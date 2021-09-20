@@ -1,7 +1,7 @@
 #ifndef BUKAS_PROOF_FUNCS
 #define BUKAS_PROOF_FUNCS
 #include <bits/stdc++.h>
-#define N 1000
+#define MAX_MATRIX_SIZE 1000
 using namespace std;
 
 bool isOdd(int x) {
@@ -9,6 +9,20 @@ bool isOdd(int x) {
         return true;
     }
     return false;
+}
+
+long long int SumToN(int n) {
+    return n * (n+1) / 2;
+}
+
+int lnko(int a, int b) {
+    if (a == 0)
+        return b;
+    return lnko(b % a, a);
+}
+
+int lkkt(int a, int b) {
+    return (a * b) / lnko(a, b);
 }
 
 void inArr(int array[], int size) {
@@ -24,7 +38,7 @@ void outArr(int array[], int size) {
     cout <<endl;
 }
 
-void inMat(int matrix[N][N], int size1, int size2) {
+void inMat(int matrix[][MAX_MATRIX_SIZE], int size1, int size2) {
     for (int i = 0; i < size1; i++) {
         for (int j = 0; j < size2; j++) {
             cin >> matrix[i][j];
@@ -32,7 +46,7 @@ void inMat(int matrix[N][N], int size1, int size2) {
     }
 }
 
-void outMat(int matrix[N][N], int size1, int size2) {
+void outMat(int matrix[][MAX_MATRIX_SIZE], int size1, int size2) {
     for (int i = 0; i < size1; i++) {
         for (int j = 0; j < size2; j++) {
             cin >> matrix[i][j];
@@ -305,34 +319,6 @@ typedef struct stack_struct{
     int Top() {
         return top->data;
     }
-    //!!!if the stack is char[]
-    /*
-    int isPal(char str[]) {
-        int len = siz;
-
-        STACK* top = (STACK*)malloc(sizeof(STACK));
-
-        int i, mid = len / 2;
-
-        for (i = 0; i < mid; i++) {
-            push(top, str[i]);
-        }
-
-        if (len % 2 != 0) {
-            i++;
-        }
-
-        while (str[i] != '\0') {
-            char ele = pop(top, str[i]);
-
-            if (ele != str[i])
-                return 0;
-            i++;
-        }
-
-        return 1;
-    }
-    */
 } STACK;
 
 typedef struct nd {
@@ -395,5 +381,149 @@ typedef struct queue_struct {
         }
     }
 } QUEUE;
+
+bool intIsPal(int n) {
+    int temp = n, dig, rev = 0;
+    do {
+        dig = temp % 10;
+        rev = (rev * 10) + dig;
+        temp /= 10;
+    } while(temp  != 0);
+
+    if(n == rev) {
+        return true;
+    } else {
+        return false;
+    }
+}
+//!!!NEEDED FOR CHARISPAL
+bool isPal(char str[], int s, int e) {
+    if (s == e)
+        return true;
+
+    if (str[s] != str[e])
+        return false;
+
+    if (s < e + 1)
+        return isPal(str, s + 1, e - 1);
+
+    return true;
+}
+//!!!NEEDED FOR CHARISPAL
+
+bool isVow(char ch) {
+    ch = toupper(ch);
+    return (ch == 'A' || ch == 'E' || ch == 'I' ||
+            ch == 'O' || ch == 'U');
+}
+
+int charCVow(char str[]) {
+    int count = 0;
+    for (int i = 0; i < strlen(str); i++)
+        if (isVow(str[i]))
+            ++count;
+    return count;
+}
+
+int charCCons(char str[]) {
+    int count = 0;
+    for (int i = 0; i < strlen(str); i++)
+        if (isVow(str[i]) == false)
+            ++count;
+    return count;
+}
+
+bool charIsPal(char str[]) {
+    int n = strlen(str);
+
+    if (n == 0)
+        return true;
+
+    return isPal(str, 0, n - 1);
+}
+
+void sortCharMat(char str[MAX_MATRIX_SIZE][MAX_MATRIX_SIZE], int n) {
+    char temp[255];
+    for(int i = 1; i < n; i++) {
+        for (int j = 1; j < n; j++) {
+            if (strcmp(str[j - 1], str[j]) > 0) {
+                strcpy(temp, str[j - 1]);
+                strcpy(str[j - 1], str[j]);
+                strcpy(str[j], temp);
+            }
+        }
+    }
+}
+
+void MatrixPrimDiag(int mat[][MAX_MATRIX_SIZE], int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (i == j)
+                cout << mat[i][j] << ", ";
+        }
+    }
+    cout << endl;
+}
+
+void MatrixSecDiag(int mat[][MAX_MATRIX_SIZE], int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if ((i + j) == (n - 1))
+                cout << mat[i][j] << ", ";
+        }
+    }
+    cout << endl;
+}
+
+void MatrixSpiralPrint(int a[][MAX_MATRIX_SIZE], int m, int n) {
+    int i, k = 0, l = 0;
+
+    /* k - sor első indexe
+        m - sor utolsó indexe
+        l - oszlop első indexe
+        n - oszlop utolsó indexe
+        i - iterator
+    */
+
+    while (k < m && l < n) {
+        for (i = l; i < n; ++i) {
+            cout << a[k][i] << " ";
+        }
+        k++;
+
+        for (i = k; i < m; ++i) {
+            cout << a[i][n - 1] << " ";
+        }
+        n--;
+
+        if (k < m) {
+            for (i = n - 1; i >= l; --i) {
+                cout << a[m - 1][i] << " ";
+            }
+            m--;
+        }
+        if (l < n) {
+            for (i = m - 1; i >= k; --i) {
+                cout << a[i][l] << " ";
+            }
+            l++;
+        }
+    }
+}
+
+int Fact(int n) {
+    if (n > 1)
+        return n * Fact(n - 1);
+    else
+        return 1;
+}
+
+int nVk(int n, int k) {
+    return Fact(n) / Fact(n - k);
+}
+
+int nCk(int n, int k) {
+    return Fact(n) / (Fact(k) * Fact(n - k));
+}
 
 #endif
