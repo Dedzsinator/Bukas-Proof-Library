@@ -4,18 +4,19 @@
 using namespace std;
 
 int main() {
-    int n,m;
-    cin>>n>>m;
-    char str[n][m];
-    for (int i = 0; i < n; i++) {
-        cout << " ";
-        cin >> str[i];
-    }
-    sortCharMat(str, n);
-
-    for (int i = 0; i < n; i++) {
-        cout << " ";
-        cout << str[i] << "\n";
-    }
+    LIST *lista = new LIST; //(LIST *)malloc(sizeof(node));
+    lista->head = NULL;
+    lista->besz_last(40);
+    lista->besz_head(20);
+    lista->besz_head(10);
+    lista->besz_utan(lista->head->kov->kov, 50);
+    lista->besz_qutan(lista->head->kov, 30);
+    lista->Kiirbal();
+    lista->torlpos(5);
+    lista->Kiirbal();
+    lista->megforditas();
+    lista->Kiirbal();
+    lista->besz_pos(50, 5);
+    lista->Kiirjobb();
     return 0;
 }

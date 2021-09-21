@@ -4,6 +4,12 @@
 #define MAX_MATRIX_SIZE 1000
 using namespace std;
 
+template <typename T>
+void univ_swap(T& a, T& b)
+{
+    T c(a); a = b; b = c;
+}
+
 bool isOdd(int x) {
     if(x % 2 != 0) {
         return true;
@@ -147,25 +153,22 @@ typedef struct doubly_circular_linked{
         (head) = uj;
     }
     //!!! IDK WHAT IT DOES
-    void besz_qelott(int x) {
-        node *q = head;
-        node *temp = new node;
-        temp->info = x;
-
-        if (q == NULL) {
-            cout << "NULL";
+    void besz_utan(node *elo_seg, int x) {
+        if (elo_seg == NULL) {
+            return;
         }
+        node *uj = new node;
 
-        temp->elo = q->elo;
-        temp->kov = q;
-        q->elo = temp;
+        uj->info = x;
 
-        if (temp->elo != NULL) {
-            temp->elo->kov = temp;
-        }
-        else {
-            head = temp;
-        }
+        uj->kov = elo_seg->kov;
+
+        elo_seg->kov = uj;
+
+        uj->elo = elo_seg;
+
+        if (uj->kov != NULL)
+            uj->kov->elo = uj;
     }
 
     void besz_qutan(node *elo, int x) {
@@ -226,6 +229,20 @@ typedef struct doubly_circular_linked{
         }
         temp->kov = temp2->kov;
         temp2->kov = temp;
+    }
+
+    void megforditas() {
+        node *bal = head, *jobb = head;
+
+        while (jobb->kov != NULL)
+            jobb = jobb->kov;
+
+        while (bal != jobb && bal->elo != jobb) {
+            univ_swap(bal->info, jobb->info);
+
+            bal = bal->kov;
+            jobb = jobb->elo;
+        }
     }
 
     void Kiirjobb() {
