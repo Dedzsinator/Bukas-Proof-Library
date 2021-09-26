@@ -4,19 +4,12 @@
 using namespace std;
 
 int main() {
-    LIST *lista = new LIST; //(LIST *)malloc(sizeof(node));
-    lista->head = NULL;
-    lista->besz_last(40);
-    lista->besz_head(20);
-    lista->besz_head(10);
-    lista->besz_utan(lista->head->kov->kov, 50);
-    lista->besz_qutan(lista->head->kov, 30);
-    lista->Kiirbal();
-    lista->torlpos(5);
-    lista->Kiirbal();
-    lista->megforditas();
-    lista->Kiirbal();
-    lista->besz_pos(50, 5);
-    lista->Kiirjobb();
+    int arr[] = {10, 20, 30, 40, 50, 60, 70};
+    int scal = 10;
+    //cout<<ArrSize(arr);
+    //univ_swap(arr[0], arr[1]);
+    cout<<ArrSum(arr);
+    //printVector(arr);
+    //cout << ArrSum(arr, ArrSize(arr));
     return 0;
 }
