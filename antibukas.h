@@ -4,6 +4,12 @@
 #define MAX_MATRIX_SIZE 1000
 using namespace std;
 
+int lnko(int a, int b) {
+    if (a == 0)
+        return b;
+    return lnko(b % a, a);
+}
+
 //**TEMPLATES !!! */
 
 template <typename T>
@@ -32,6 +38,17 @@ template <typename T, int size>
             sum += array[i];
         }
         return sum;
+    }
+
+template <typename T, int size>
+    static void ArrSort(T(&array)[size]) {
+        for(int i = 0; i < size; i++) {
+            for(int j = i + 1; j < size; j++) {
+                if(array[i] > array[j]) {
+                    univ_swap(array[i], array[j]);
+                }
+            }
+        }
     }
 
 template <typename T, int size>
@@ -92,10 +109,9 @@ template <typename T, int size>
         return false;
     }
 
-// ANCHOR //!!!
 template <typename T, int size>
-    static T maxi(T(&array)[size]) {
-        if (!isEmpty(array)) {
+    static T ArrMaxi(T(&array)[size]) {
+        if (!ArrEmpty(array)) {
             T maxVal = array[0];
             for (int i = 1;i < ArrSize(array);i++) {
                 if (array[i] > maxVal) {
@@ -107,14 +123,10 @@ template <typename T, int size>
             throw invalid_argument("Hiba");
         }
     }
-    /** Finds the maximum value in a vector.
-     * @param v the vector from which to find the maximum value
-     * @returns the maximum value in the vector v
-     */
-// ANCHOR //!!!
+
 template <typename T, int size>
-    static T mini(T(&array)[size]) {
-        if (!isEmpty(array)) {
+    static T ArrMini(T(&array)[size]) {
+        if (!ArrEmpty(array)) {
         T minVal = array[0];
         for (int i = 1;i < ArrSize(array);i++) {
             if (array[i] < minVal) {
@@ -126,15 +138,10 @@ template <typename T, int size>
         throw invalid_argument("Hiba");
         }
     }
-    /** Finds the minimum value in a vector.
-     * @param v the vector from which to find the minimum value
-     * @returns the minimum value in the vector v
-     */
 
-// ANCHOR //!!!
 template <typename T, int size>
     static int maxIndex(T(&array)[size]) {
-        if (!isEmpty(array)) {
+        if (!ArrEmpty(array)) {
         T maxVal = array[0];
         int maxIndex = 0;
         for (int i = 1;i < ArrSize(array);i++) {
@@ -148,14 +155,10 @@ template <typename T, int size>
             throw invalid_argument("Hiba");
         }
     }
-    /** Finds the index of the maximum value in a vector.
-     * @param v the vector from which to find the max index
-     * @returns the index of the maximum value in the vector v
-     */
-// ANCHORT //!!!
+
 template <typename T, int size>
     static int minIndex(T(&array)[size]) {
-        if (!isEmpty(array)) {
+        if (!ArrEmpty(array)) {
         T minVal = array[0];
         int minIndex = 0;
 
@@ -170,20 +173,15 @@ template <typename T, int size>
             throw invalid_argument("Hiba");
         }
     }
-    /** Finds the index of the minimum value in a vector.
-     * @param v the vector from which to find the min index
-     * @returns the index of the minimum value in the vector v
-     */
 
 template <typename T, int size>
-    static void printVector(T(&array)[size]) {
-        for (int i = 0; i < ArrSize(array);i++) {
-            cout << array[i] << endl;
+    static void printArr(T(&array)[size], T limit1, T limit2) {
+        for (int i = limit1; i < limit2;i++) {
+            cout << array[i] << " ";
         }
     }
 
 template <typename T, int size>
-/** @Returns the last element of the vector */
     static T getLastElement(T(&array)[size]) {
         if (ArrSize(array) > 0) {
             return array[ArrSize(array)-1];
@@ -193,7 +191,6 @@ template <typename T, int size>
     }
 
 template <typename T, int size>  
-    /** @Returns the first element of the vector */
     static T getFirstElement(T(&array)[size]) {
         if (ArrSize(array) > 0) {
             return array[0];
@@ -201,27 +198,25 @@ template <typename T, int size>
         throw invalid_argument("Hiba");
         }
     }
-    
-template <typename T>
-    /** @Returns a vector containing only the even elements of an input vector */
-    static T getEvenElements(T array[]) {
-        return getEveryNthElementStartingFromK(array, 2, 0);
+
+/*  
+template <typename T, int size1, int size2>
+    static T getEvenElements(T (&array)[size1], T (&result)[size2]) {
+        return ArrElemNtoK(array, 2, 0, result);
     }
 
-template <typename T>
-    /** @Returns a vector containing only the odd elements of an input vector */
-    static T getOddElements(T array[]) {
-        return getEveryNthElementStartingFromK(array, 2, 1);
+template <typename T, int size1, int size2>
+    static T getOddElements(T (&array)[size1], T (&result)[size2]) {
+        return ArrElemNtoK(array, 2, 1, result);
     }
+*/
 
-//ANCHOR //!!!
-template <typename T, int size>    
-    /** Given an input vector, @returns a vector containing every nth element, starting from k  */    
-    static T getEveryNthElementStartingFromK(T(&array)[size],int n,int k) {
-        if ((n >= ArrSize(array)) || (array >= ArrSize(array))) {
-        throw invalid_argument("Hibas parameterek");
+template <typename T, int size1, int size2>
+    //???        
+    static void ArrElemNtoK(T (&array)[size1],T n,T k, T (&result)[size2]) {
+        if ((n >= ArrSize(array)) || (n >= ArrSize(array))) {
+            throw invalid_argument("Hibas parameterek");
         } else {
-        T result[size]; //T result;
         int i = k;
         
         while (i < ArrSize(array)) {
@@ -229,7 +224,6 @@ template <typename T, int size>
             i += n;
         }
         
-        return result;
         }
     }
 
@@ -245,15 +239,34 @@ template <typename T, int size>
         
         return count;
     }
-    /** Counts the number of occurrences of an element in a given vector.
-     * @param v the vector to examine
-     * @param element the element to count
-     * @returns the number of instances of element in the vector v
-     */
-    
+
+template <typename T, int size>
+    static int ArrLnko(T(&array)[size]) {
+        int result = array[0];
+        for (int i = 1; i < size; i++) {
+            result = lnko(array[i], result);
+
+            if(result == 1) {
+                return 1;
+            }
+        }
+        return result;
+    }
+
+template <typename T, int size>
+    static int ArrLkkt(T(&array)[size]) {
+        int result = array[0];
+
+        for (int i = 1; i < size; i++)
+            result = (((array[i] * result)) /
+                (lnko(array[i], result)));
+
+        return result;
+    }
+
 template <typename T, int size>
     static double ArrProd(T(&array)[size]) {
-            if (!isEmpty(array)) {
+            if (!ArrEmpty(array)) {
             double prod = (double) array[0];
             
             for (int i = 1;i < ArrSize(array);i++) {
@@ -265,20 +278,10 @@ template <typename T, int size>
             throw invalid_argument("Hiba");
             }
     }
-    /** Calculates the product of all elements in the vector.
-     * NB. this returns a double as it anticipates a potentially large value
-     *
-     * @param v the vector to calculate the product for
-     * @returns the product of the vector v
-     */
     
 template <typename T, int size>
-    /** Calculates the arithmetic mean of the elements in a vector
-     * @param v the vector from which to calculate the arithmetic mean
-     * @returns the arithmetic mean of the vector v
-     */
     static double ArrMean(T(&array)[size]) {
-        if (!isEmpty(array)) {
+        if (!ArrEmpty(array)) {
         double L = (double) ArrSize(array);
         double sumVal = (double) ArrSum(array);
         return sumVal / L;
@@ -288,17 +291,13 @@ template <typename T, int size>
     }
 
 template <typename T, int size>
-    /** Calculates the median of the elements in a vector
-     * @param v the vector from which to calculate the median
-     * @returns the median of the vector v
-     */
-    ///ANCHOR //?
+    //?
     static double ArrMedian(T(&array)[size]) {
-        if (!isEmpty(array)) {
+        if (!ArrEmpty(array)) {
         double median;
         size_t L = ArrSize(array);
         
-        ArrSort(array, 0, L-1);
+        ArrSort(array);
         
         if (L  % 2 == 0) {
             median = ((double)(array[L / 2 - 1] + array[L / 2])) / 2.0;
@@ -312,12 +311,8 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Calculates the variance of the elements in a vector
-     * @param v the vector from which to calculate the variance
-     * @returns the variance of the vector v
-     */
     static double ArrVariance(T(&array)[size]) {
-        if (!isEmpty(array)) {
+        if (!ArrEmpty(array)) {
         double mu = ArrMean(array);
         double sumVal = 0.0;
         for (int i = 0;i < ArrSize(array);i++) {
@@ -331,12 +326,8 @@ template <typename T, int size>
     }
 
 template <typename T>
-    /** Calculates the standard deviation of the elements in a vector
-     * @param v the vector from which to calculate the standard deviation
-     * @returns the standard deviation of the vector v
-     */
     static double ArrStdDev(T array[]) {//& StandardDeviations
-        if (!isEmpty(array)) {
+        if (!ArrEmpty(array)) {
             double var = ArrVariance(array);
 
             if (var > 0) {
@@ -351,10 +342,6 @@ template <typename T>
     }
     
 template <typename T, int size>
-    /** Calculates the L1-norm of a vector.
-     * @param v the vector from which to calculate the norm
-     * @returns the L1-norm of the vector
-     */
     static double ArrNorm1(T(&array)[size]) {
         double sumVal = 0.0;
     
@@ -370,10 +357,6 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Calculates the L2-norm of a vector.
-     * @param v the vector from which to calculate the norm
-     * @returns the L2-norm of the vector
-     */
     static double ArrNorm2(T(&array)[size]) {
         double sumVal = 0.0;
     
@@ -385,11 +368,6 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Calculates the p-norm of a vector.
-     * @param v the vector from which to calculate the norm
-     * @param p the exponent to use in the calculate of the norm
-     * @returns the p-norm of the vector
-     */
     static double ArrNormP(T(&array)[size],double p) {
         double sumVal = 0.0;
     
@@ -409,33 +387,18 @@ template <typename T, int size>
     }
     
 template <typename T>
-    /** Calculates the magnitude (L2-norm) of a vector 
-     * @param v the vector from which to calculate the norm
-     * @returns the vector magnitude
-     */
     static double ArrMag(T array[]) {
         return ArrNorm2(array);
     }
 
 template <typename T, int size>
-    /** Sets every element to a specified value
-     * @param v the vector to fill with values
-     * @param element the value to set each index in the vector to
-     */
-    //ANCHOR //!!!
-    static void fillVectorWith(T(&array)[size],T element) {
+    static void fillArrWith(T(&array)[size],T element) {
         for (int i = 0;i < ArrSize(array);i++) {
             array[i] = element;
         }
     }
     
 template <typename T, int size>
-    /** Multiply every element in a vector by a scalar.
-     * @param v the vector to multiply
-     * @param scalar the scalar to multiply the vector by
-     */
-
-    //ANCHOR //?
     static void ArrMultiScal(T(&array)[size],T scalar) {
         for (int i = 0;i < ArrSize(array);i++) {
             array[i] *= scalar;
@@ -443,10 +406,6 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Multiply one vector by another
-     * @param array1 the first vector (to be multiplied in place)
-     * @param array2 the second vector
-     */
     static void ArrMultiVec(T(&array1)[size],T(&array2)[size]) {
         if (ArrSize(array1) == ArrSize(array2)) {
             for (int i = 0;i < ArrSize(array1);i++) {
@@ -459,10 +418,6 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Divide every element in a vector by a scalar.
-     * @param v the vector to divide
-     * @param scalar the scalar to divide the vector by
-     */
     static void ArrDivScal(T(&array)[size],T scalar) {
         if(scalar != 0) {
             for (int i = 0;i < ArrSize(array);i++) {
@@ -474,10 +429,6 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Divide one vector by another
-     * @param v1 the first vector (to be divided in place)
-     * @param v2 the second vector
-     */
     static void ArrDivVec(T(&array1)[size],T(&array2)[size]) {
         if(ArrSize(array1) == ArrSize(array2))  {
             if (!contains(array2, 0)) {
@@ -493,10 +444,6 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Add a value to every element in a vector.
-     * @param v the vector to which the value will be added
-     * @param value the value to be added to each element of the vector
-     */
     static void ArrAddScal(T(&array)[size],T value) {
         for (int i = 0;i < ArrSize(array);i++) {
             array[i] += value;
@@ -504,10 +451,6 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Add one vector to another
-     * @param array1 the first vector (to be added to in place)
-     * @param array2 the second vector
-     */
     static void ArrAddVec(T(&array1)[size],T(&array2)[size]) {
         if (ArrSize(array1) == ArrSize(array2)) {
             for (int i = 0;i < ArrSize(array1);i++) {
@@ -519,10 +462,6 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Subtract a value from every element in a vector.
-     * @param v the vector from which the value will be subtracted
-     * @param value the value to be subtracted from each element of the vector
-     */
     static void ArrSubScal(T(&array)[size],T value) {
         for (int i = 0;i < ArrSize(array);i++) {
             array[i] -= value;
@@ -530,10 +469,6 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Subtract one vector from another
-     * @param v1 the first vector (to be subtracted from in place)
-     * @param v2 the second vector
-     */
     static void ArrSubVec(T(&array1)[size],T(&array2)[size]) {
         if (ArrSize(array1) == ArrSize(array2)) {
             for (int i = 0;i < ArrSize(array1);i++) {
@@ -545,9 +480,6 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Calculate the absolute value for each element of a vector.
-     * @param v the vector to calculate the absolute value on
-     */
     static void ArrAbs(T(&array)[size]) {
         for (int i = 0;i < ArrSize(array);i++) {
             if ((array[i] < 0) || (array[i] == -0.0)) {
@@ -557,9 +489,6 @@ template <typename T, int size>
     }
 
 template <typename T, int size>
-    /** Calculate the square of each element of a vector.
-     * @param v the vector to calculate the square of
-     */
     static void ArrPow(T(&array)[size]) {
         for (int i = 0;i < ArrSize(array);i++) {
             array[i] = array[i]*array[i];
@@ -567,10 +496,6 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Calculate the square root of each element of a vector.
-     * @param v the vector to calculate the square root of
-     */
-    //ANCHOR //?
     static void ArrSqrt(T(&array)[size]) {
         if (CsakPoz(array)) {
             for (int i = 0;i < ArrSize(array);i++) {
@@ -580,53 +505,22 @@ template <typename T, int size>
             throw invalid_argument( "Negativ szam gyoke");
         }
     }
-    
-template <typename T>
-    /** Sorts a vector */
-    //ANCHOR //?
-    static void ArrSort(T &array, int low, int high) {
-        if (low < high) {
-            int pivot = array[high];
-            int i = (low - 1);
 
-            for (int j = low; j <= high - 1; j++) {
-                if (array[j] < pivot) {
-                    i++;
-                    int temp = array[i];
-                    array[i] = array[j];
-                    array[j] = temp;
-                }
-            }
-            int temp = array[i + 1];
-            array[i + 1] = array[high];
-            array[high] = temp;
-            int pi = i + 1;
-
-            ArrSort(array, low, pi - 1);
-            ArrSort(array, pi + 1, high);
+template <typename T, int size>
+    static void ArrRev(T(&array)[size]) {
+        for (int low = 0, high = size - 1; low < high; low++, high--) {
+            univ_swap(array[low], array[high]);
         }
     }
 
-template <typename T>
-    /** Reverses a vector */
-    //ANCHOR //?
-    static void reverse(T &array) {
-        reverse(array.begin(), array.end());
-    }
-
 template <typename T, int size>
-    /** Scales the values in a vector to take values in the range [lowerLimit, upperLimit]
-     * @param v the vector to scale
-     * @param lowerLimit the lower limit of the scaled vector
-     * @param upperLimit the uppoer limit of the scaled vector
-     * @returns a double precision vector containing the scaled vector
-     */
+    //* Scales the values in a vector to take values in the range [lowerLimit, upperLimit]
     //ANCHOR //!!!
     static double ArrScale(T(&array)[size],double lowerLimit,double upperLimit) {
         T result[];
     
-        double minVal = (double) min(array);
-        double maxVal = (double) max(array);
+        double minVal = (double) ArrMini(array);
+        double maxVal = (double) ArrMaxi(array);
         double outputRange = upperLimit - lowerLimit;
         double inputRange = maxVal - minVal;
     
@@ -640,8 +534,7 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Calculate the element-wise difference for a vector */
-    //ANCHOR //!!!
+    //???
     static T ArrDiff(T(&array)[size]) {
         T result[];
     
@@ -653,50 +546,29 @@ template <typename T, int size>
     }
 
 template <typename T, int size>
-    /** Create a new vector of zeros of length N */
-    //ANCHOR //!!!
-    static T ArrZeros(T(&array)[size]) {
-        if (ArrSize(array) >= 0) {
-            T result[];
-        
-            for (int i = 0;i < ArrSize(array);i++) {
+    static void ArrZeros(T (&result)[size]) {
+        if (ArrSize(result) >= 0) {        
+            for (int i = 0;i < size;i++) {
                 result[i] = 0;
             }
-        
-        return result;
         } else {
             throw invalid_argument("Negativ hossz");
         }
     }
     
 template <typename T, int size>
-    /** Create a new vector of ones of length N */
-    //ANCHOR //!!!
-    static T ArrOnes(T(&array)[size]) {
-        if (ArrSize(array) >= 0) {
-            T result[];
-        
-            for (int i = 0;i < ArrSize(array);i++) {
+    static T ArrOnes(T (&result)[size]) {
+        if (ArrSize(result) >= 0) {
+            for (int i = 0;i < ArrSize(result);i++) {
                 result[i] = 1;
             }
-        
-            return result;
         } else {
             throw invalid_argument("Negativ hossz");
         }
     }
 
-template <typename T>
-    /** Create a new vector with values in the range [limit1,limit2], with specified increments.
-     * @param limit1 the first limit
-     * @param limit2 the second limit
-     * @param step the increment to use
-     * @returns a new vector containing values in the range [limit1,limit2], with specified incremements.
-    */
-    //ANCHOR //?
-    static T ArrRange(int limit1,int limit2,int step) {
-        T result[];
-    
+template <typename T, int size>
+    static void ArrRange(T limit1, T limit2, int step, T (&result)[size]) {
         if (step > 0) {
             for (T i = limit1;i < limit2;i += step) {
                 result[i] = i;
@@ -708,38 +580,21 @@ template <typename T>
         } else {
             throw invalid_argument( "Nem lehet nulla lepesszam");
         }
-    
-        return result;
     }
 
 template <typename T>
-    /** Create a new vector with values increasing from 0->(maxValue-1).
-     * @param maxValue the upper limit of the range
-     * @returns a new vector containing values in the range [0,maxValue)
-    */
-    static T ArrRMax(int maxValue) {
+    static T ArrRMax(T maxValue) {
         return ArrRange(0, maxValue, 1);
     }
 
 template <typename T>
-    /** Create a new vector with values increasing from minValue->(maxValue-1).
-     * @param minValue the lower limit of the range
-     * @param maxValue the upper limit of the range
-     * @returns a new vector containing values in the range [minValue,maxValue)
-    */
-    static T ArrRMinMax(int minValue,int maxValue) {
+    static T ArrRMinMax(T minValue,T maxValue) {
         return ArrRange(minValue, maxValue, 1);
     }
 
 template <typename T, int size>
-    /** Calculates the dot product between two vectors.
-     * @param v1 the first vector
-     * @param v2 the second vector
-     * @returns the dot product of the two vectors
-     */
-    ///ANCHOR //?
     static double ArrDProd(T(&array1)[size],T(&array2)[size]) {
-         if (ArrSize(array1) == ArrSize(array2)) {
+        if (ArrSize(array1) == ArrSize(array2)) {
             double sumVal = 0.0;
         
             for (int i = 0;i < ArrSize(array1);i++) {
@@ -753,12 +608,6 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Calculates the Euclidean distance between two vectors.
-     * @param v1 the first vector
-     * @param v2 the second vector
-     * @returns the Euclidean distance between the two vectors
-     */
-    //ANCHOR //?
     static double ArrEucliDist(T(&array1)[size],T(&array2)[size]) {
         if (ArrSize(array1) == ArrSize(array2)) {
             double sumVal = 0.0;
@@ -779,25 +628,45 @@ template <typename T, int size>
     }
     
 template <typename T, int size>
-    /** Calculates the Cosine similarity between two vectors.
-     * @param v1 the first vector
-     * @param v2 the second vector
-     * @returns the Cosine similarity between the two vectors
-     */
-    //ANCHOR //?
     static double ArrCosSim(T(&array1)[size],T(&array2)[size]) {
         return ArrDProd(array1, array2) / (ArrMag(array1) * ArrMag(array2));
     }
 
 template <typename T, int size>
-    /** Calculates the Cosine distance between two vectors.
-     * @param v1 the first vector
-     * @param v2 the second vector
-     * @returns the Cosine distance between the two vectors
-     */
-    //ANCHOR //?
     static double ArrCosDist(T(&array1)[size],T(&array2)[size]) {
         return 1.0 - ArrCosSim(array1, array2);
+    }
+
+template <typename T, int size1, int size2>
+    static T ArrMerge(T(&array1)[size1],T(&array2)[size2]) {
+        T array3[];
+        ArrSort(array1);
+        ArrSort(array2);
+
+        int i = 0, j = 0, k = 0;  
+        while (i < size1 && j < size2) { 
+            if (array1[i] <= array2[j]) {  
+                array3[k] = array1[i];  
+                i += 1;  
+                k += 1;  
+            } else {  
+                array3[k] = array2[j];
+                j += 1;  
+                k += 1;  
+            }  
+        }  
+        while (i < size1) {
+            array3[k] = array1[i];  
+            i += 1;  
+            k += 1;  
+        }  
+        while (j < size2) {
+            array3[k] = array2[j];  
+            j += 1;  
+            k += 1;  
+        }
+
+        return array3;
     }
 
 //**TEMPLATES !!! */
@@ -814,27 +683,10 @@ long long int SumToN(int n) {
     return n * (n+1) / 2;
 }
 
-int lnko(int a, int b) {
-    if (a == 0)
-        return b;
-    return lnko(b % a, a);
-}
-
-int lkkt(int a, int b) {
-    return (a * b) / lnko(a, b);
-}
-
 void inArr(int array[], int size) {
     for (int i = 0; i < size; i++) {
         cin >> array[i];
     }
-}
-
-void outArr(int array[], int size) {
-    for(int i = 0; i < size; i++) {
-        cout <<array[i];
-    }
-    cout <<endl;
 }
 
 void inMat(int matrix[][MAX_MATRIX_SIZE], int size1, int size2) {
@@ -865,10 +717,6 @@ bool ifPrim(int n) {
     return true;
 }
 
-/*int sizeofArr(int arr[]) {
-    return &arr + 1 - arr;
-}*/
-
 int binarySearch(int array[], int left, int right, int x) {
     if (right >= left) {
         int mid = left + (right - left) / 2;
@@ -883,39 +731,6 @@ int binarySearch(int array[], int left, int right, int x) {
     }
 
     return -1;
-}
-
-//!!!NEEDED FOR QUICKSORT
-int partition(int arr[], int low, int high) {
-    int pivot = arr[high];
-    int i = (low - 1);
-
-    for (int j = low; j <= high - 1; j++) {
-        if (arr[j] < pivot) {
-            i++;
-            int temp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = temp;
-        }
-    }
-    int temp = arr[i + 1];
-    arr[i + 1] = arr[high];
-    arr[high] = temp;
-    return (i + 1);
-}
-//!!!NEEDED FOR QUICKSORT
-
-void quickSort(int arr[], int low, int high) {
-    if (low < high) {
-        int pi = partition(arr, low, high);
-
-        quickSort(arr, low, pi - 1);
-        quickSort(arr, pi + 1, high);
-    }
-}
-
-void mergeArrs() {
-
 }
 
 typedef struct seg {

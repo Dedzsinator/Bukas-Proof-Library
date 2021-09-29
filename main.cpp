@@ -3,13 +3,17 @@
 #define MAX_MATRIX_SIZE 1000
 using namespace std;
 
+int result[10];
+
 int main() {
-    int arr[] = {10, 20, 30, 40, 50, 60, 70};
-    int scal = 10;
-    //cout<<ArrSize(arr);
-    //univ_swap(arr[0], arr[1]);
-    cout<<ArrSum(arr);
-    //printVector(arr);
-    //cout << ArrSum(arr, ArrSize(arr));
+    int arr[] = {10,20,30,40,50,60,70};
+    int lim = 1;
+    int scal = 5;
+    
+    ArrElemNtoK(arr,2, 2, result);
+    printArr(result,0,ArrSize(result));
+    //ArrRange(lim,scal,1, result);
+    //printArr(result, lim,scal);
+
     return 0;
 }
