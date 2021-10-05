@@ -4,13 +4,14 @@
 #define MAX_MATRIX_SIZE 1000
 using namespace std;
 
-int lnko(int a, int b) {
-    if (a == 0)
-        return b;
-    return lnko(b % a, a);
-}
+template<typename T>
+    int lnko(T a, T b) {
+        if (a == 0)
+            return b;
+        return lnko(b % a, a);
+    }
 
-//**TEMPLATES !!! */
+//** TEMPLATES ARRAY !!! */
 
 template <typename T>
     void univ_swap(T& a, T& b) {
@@ -669,8 +670,41 @@ template <typename T, int size1, int size2>
         return array3;
     }
 
-//**TEMPLATES !!! */
+//** TEMPLATES ARRAY !!! */
 
+//** TEMPLATES MATRIX !!! */
+
+template <typename T, size_t row, size_t col>
+    static T MatGet(T(&matrix)[row][col], T r, T c) {
+        if(0 <= r && r < row && 0 <= c && c < col){
+		    return matrix[r][c];
+	    } else {
+		throw new outOfRangeExcep("Meghaladott méret");
+	    }
+    }
+
+template <typename T, size_t row, size_t col>
+    static T MatSet(T(&matrix)[row][col], T r, T c, T val) {
+        T ret = 0;
+	    if(r < row && c < col){
+		    matrix[r][c] = val;
+	    } else {
+		    ret = 1;
+		    throw new invalidParamExcep("Meghaladott méret");
+	    }
+	    return ret;
+    }
+
+template <typename T, size_t row, size_t col>
+    static 
+
+//** TEMPLATES MATRIX !!! */
+
+//** TEMPLATES GRAPH !!! */
+
+
+
+//** TEMPLATES GRAPH !!! */
 
 bool isOdd(int x) {
     if(x % 2 != 0) {

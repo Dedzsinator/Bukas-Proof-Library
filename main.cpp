@@ -6,6 +6,7 @@ using namespace std;
 int result[10];
 
 int main() {
+    int matrix[3][3] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     int arr[] = {10,20,30,40,50,60,70};
     int lim = 1;
     int scal = 5;
