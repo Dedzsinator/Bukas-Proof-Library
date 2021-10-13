@@ -708,8 +708,6 @@ public:
 
 	void print();
 
-    //!somechange
-
 	void read(istream&);
 
 	vector<vector<double>> toVector();
