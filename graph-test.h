@@ -251,7 +251,32 @@ void DFS(int boole[30][30],int n, int cs) {
 
 
 //^ Spec
-void checkIzP() {
+
+bool existPath(int ell[100][3],int n, int u, int v) {
+    bool bol[n][n];
+    memset(bol, false, sizeof(bol));
+
+    for (int i = 1; i <= n; i++)
+        bol[ell[i][1]][ell[i][2]] = true;
+
+    for (int k = 1; k <= n; k++) {
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= n; j++) {
+                bol[i][j] = bol[i][j] || bol[i][k] && bol[k][j];
+            }
+        }
+    }
+
+    if (u >= n || v >= n) {
+        return false;
+    }
+
+    if (bol[u][v])
+        return true;
+    return false;
+}
+
+void checkIzP() { //megnezi hogy van-e izolalt pont
     
 }
 
