@@ -12,9 +12,9 @@ int main() {
     int scal = 5;
     
     ArrElemNtoK(arr,2, 2, result);
-    printArr(result,0,ArrSize(result));
+    ArrPrint(result,0,ArrSize(result));
     //ArrRange(lim,scal,1, result);
-    //printArr(result, lim,scal);
+    //ArrPrint(result, lim,scal);
 
     return 0;
 }

@@ -1,5 +1,6 @@
 #ifndef GRAFOK
 #define GRAFOK
+#define INF 99999
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -8,7 +9,12 @@ template<typename T, int size>
         return size;
     }
 
-//^ Matrixok atalakitasai
+template <typename T>
+    void univ_swap(T& a, T& b) {
+        T c(a); a = b; b = c;
+    }
+
+//~ Matrixok atalakitasai
 
 void boolToIncid(int boole[100][100], int n, int inc[100][100]) {
     int siz = 0;
@@ -31,14 +37,14 @@ void boolToIncid(int boole[100][100], int n, int inc[100][100]) {
     }
 }
 
-void boolToEll(int boole[100][100], int n, int ell[100][3]) {
-    int num = 0;
-    for (int i = 1; i <= n; i++) {
-        for (int j = 1; j <= i; j++) {
-            if (boole[i][j] == 1) {
-                num++;
-                ell[num][1] = j;
-                ell[num][2] = i;
+//!(main: m = 0)
+void boolToEll(int boole[100][100], int n, int ell[100][4], int &m) {
+    for(int i = 1; i <= n; i++) {
+        for(int j = 1; j <= i; j++) {
+            if(boole[i][j] != 0) {
+                m++;
+                ell[m][1] = j;
+                ell[m][2] = i;
             }
         }
     }
@@ -116,26 +122,31 @@ void ellToBool(int ell[100][3], int n, int boole[100][100]) {
     }
 }
 
-void ellToIncid(int ell[100][3], int n, int inc[100][100]) {
-
-}
-
-//!NOT WORKING
-void incidToBool(int inc[100][100], int n, int m, int boole[100][100]) {
+void EllToIncid(int ell[100][3], int m, int &n, int inc[100][100]) {
+    n = 0;
+    int maxi = 1;
+    int cnt = 0;
     for(int i = 1; i <= m; i++) {
-        for(int j = 1; j <= n; j++) {
-            if(inc[j][i] != 0) {
-                boole[i][j] = 1;
-                boole[j][i] = 1;
-            }
+        maxi = ell[i][2];
+        if(maxi > n) {
+            n = maxi;
         }
+        cnt++;
+        inc[ell[i][1]][cnt] = 1;
+        inc[ell[i][2]][cnt] = 1;
     }
 }
 
-void incidToAdj(int inc[100][100], int n, int m, int adj[100][100]) {
-
+//^CHECK
+void incidToBool(int inc[100][100], int n, int m, int boole[100][100]) {
 }
 
+//^CHECK
+void incidToAdj(int inc[100][100], int n, int m, int adj[100][100]) {
+    
+}
+
+//^CHECK
 void adjToIncid(int adj[100][100], int n, int inc[100][100]) {
 
 }
@@ -153,7 +164,7 @@ void adjToEll(int adj[100][100], int n, int ell[100][3]) {
     }
 }
 
-//^ Bejarasok
+//~ Bejarasok
 
 void BFS(int boole[30][30],int n, int cs) {
     int first, last, pont;
@@ -208,51 +219,201 @@ void DFS(int boole[30][30],int n, int cs) {
     }
 }
 
-//^ Legrovidebb utak
-    //& Dijsktra
-    //? ReWrite 66 old
-    
-    int minDistance(int dist[], bool sptSet[], int n) {
-        int min = INT_MAX, min_index;
-        for (int v = 0; v < n; v++)
-            if (sptSet[v] == false && dist[v] <= min)
-                min = dist[v], min_index = v;
-        return min_index;
-    }   
-    
-    void dijkstra(int graph[100][100], int src, int n) {
-        int dist[100];
-        bool sptSet[100];
+//~ Fak
 
-        for (int i = 0; i < n; i++) {
-            dist[i] = INT_MAX, sptSet[i] = false;
+void DFSUtil(int u, int adj[100][100], bool visited[], int n) {
+        visited[u] = true;
+        for (int i=1; i <= n; i++)
+            if (visited[adj[u][i]] == false)
+                DFSUtil(adj[u][i], adj, visited, n);
+    }
+
+int GrCTrees(int adj[100][100], int n) {
+    bool visited[n];
+    memset(visited,false,sizeof(visited));
+    int res = 0;
+    for (int u=1; u <= n; u++) {
+        if (visited[u] == false) {
+            DFSUtil(u, adj, visited, n);
+            res++;
         }
+    }
+    return res;
+}
 
-        dist[src] = 0;
+//~ Feszitofa alkotas
 
-        for (int count = 0; count < n - 1; count++) {
-            int u = minDistance(dist, sptSet, n);
-            sptSet[u] = true;
-
-            for (int v = 0; v < n; v++)
-                if (!sptSet[v] && graph[u][v] && dist[u] != INT_MAX
-                    && dist[u] + graph[u][v] < dist[v])
-                    dist[v] = dist[u] + graph[u][v];
+//&Kruskal
+void azonos(int a,int b, int komp[100], int n) {
+    int c = komp[b];
+    for(int i = 1; i <= n; i++) {
+        for(int j = 1; j <= n; j++) {
+            if(komp[i] == c) {
+                komp[i] = komp[a];
+            }
         }
+    }
+}
 
-        cout <<"Vertex \t Distance from Source" << endl;
-        for (int i = 0; i < n; i++) {
-            cout  << i << " \t\t"<<dist[i]<< endl;
+void BSort(int ell[100][4], int m) {
+    bool x = false;
+    int lp = 0;
+    do {
+        x = false;
+        for (int i = 1; i < m - lp; i++) {
+            if (ell[i][3] > ell[i + 1][3]) {
+                x = true;
+                univ_swap(ell[i][1], ell[i + 1][1]);
+                univ_swap(ell[i][2], ell[i + 1][2]);
+                univ_swap(ell[i][3], ell[i + 1][3]);
+            }
+            lp++;
+        }
+    } while (x == true);
+}
+
+bool ellenoriz(int a,int b, int komp[100]) {
+    return komp[a] == komp[b];
+}
+
+void GrKruskal(int boole[100][100], int n, int ell[100][4], int m, int ell2[100][3]) {
+    int komp[100], k, i;
+    boolToEll(boole,n,ell,m);
+    BSort(ell, m);
+    k=1, i = 1;
+    while(k <= n - 1) {
+        if(ellenoriz(ell[i][1], ell[i][2], komp) == false) {
+            azonos(ell[i][1], ell[i][2], komp, n);
+            ell2[k][1] = ell[i][1];
+            ell2[k][2] = ell[i][2];
+            ell2[k][3] = ell[i][3];
+            k++;
+        }
+        i++;
+    }
+}
+
+//&Prim
+
+int minKey(int key[100], bool mstSet[100], int n) {
+    int min = INT_MAX, min_index;
+
+    for (int v = 1; v <= n; v++)
+        if (mstSet[v] == false && key[v] < min)
+            min = key[v], min_index = v;
+
+    return min_index;
+}
+
+void printMST(int parent[100], int boole[100][100], int n, int ell[100][3]) {
+    for (int i = 2; i <= n; i++) {
+        ell[i - 1][1] = parent[i];
+        ell[i - 1][2] = i;
+        ell[i - 1][3] = boole[i][parent[i]];
+    }
+}
+
+void GrPrim(int boole[100][100], int n, int ell[100][3]) {
+    int parent[100];
+    int key[100];
+    bool mstSet[100];
+
+    for (int i = 1; i <= n; i++)
+        key[i] = INT_MAX, mstSet[i] = false;
+
+    key[1] = 0;
+    parent[1] = -1;
+
+    for (int count = 1; count <= n - 1; count++) {
+        int u = minKey(key, mstSet, n);
+
+        mstSet[u] = true;
+
+        for (int v = 1; v <= n; v++)
+            if (boole[u][v] && mstSet[v] == false && boole[u][v] < key[v])
+                parent[v] = u, key[v] = boole[u][v];
+    }
+    printMST(parent, boole, n, ell);
+}
+
+//~ Legrovidebb utak
+
+//& Dijkstra
+int minDistance(int dist[], bool sptSet[], int n) {
+    int min = INT_MAX, min_index;
+
+    for (int v = 1; v <= n; v++)
+        if (sptSet[v] == false && dist[v] <= min)
+            min = dist[v], min_index = v;
+
+    return min_index;
+}
+
+void grDijkstra(int boole[100][100], int src, int n) {
+    int dist[100];
+    bool sptSet[100];
+
+    for (int i = 1; i <= n; i++)
+        dist[i] = INT_MAX, sptSet[i] = false;
+
+    dist[src] = 0;
+
+    for(int count = 1; count <= n - 1; count++) {
+        int u = minDistance(dist, sptSet, n);
+        sptSet[u] = true;
+
+        for (int v = 1; v <= n; v++)
+            if (!sptSet[v] && boole[u][v] && dist[u] != INT_MAX &&
+                dist[u] + boole[u][v] < dist[v])
+                dist[v] = dist[u] + boole[u][v];
+    }
+
+    cout << "Csomopont \tTavolsag a kiinduloponntol" << endl;
+    for (int i = 1; i <= n; i++) {
+        if(dist[i] == INT_MAX) {
+            cout << i << " \t\t" << "INF" << endl;
+        } else {
+            cout << i << " \t\t" << dist[i] << endl;
+        }
+    }
+}
+
+//& Floyd Warshall
+void grFloydWar(int graph[100][100], int n) {
+    //!!! PUT 99 OR BIG NUMBER WHERE SHOULD BE INF
+    int dist[100][100], i, j, k;
+    for (i = 1; i <= n; i++)
+        for (j = 1; j <= n; j++)
+            dist[i][j] = graph[i][j];
+
+    for (k = 1; k <= n; k++) {
+        for (i = 1; i <= n; i++) {
+            for (j = 1; j <= n; j++) {
+                if (dist[i][j] > (dist[i][k] + dist[k][j])
+                    && (dist[k][j] != INF
+                        && dist[i][k] != INF))
+                    dist[i][j] = dist[i][k] + dist[k][j];
+            }
         }
     }
 
-    //& Roy-Floyd
-    //? 70 old
+    cout << "The following matrix shows the shortest "
+            "distances"
+            " between every pair of vertices \n";
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            if (dist[i][j] == 99)
+                cout << "INF" << "     ";
+            else
+                cout << dist[i][j] << "     ";
+        }
+        cout << endl;
+    }
+}
 
+//~ Spec
 
-//^ Spec
-
-bool existPath(int ell[100][3],int n, int u, int v) {
+bool existPath(int ell[100][4],int n, int u, int v) {
     bool bol[n][n];
     memset(bol, false, sizeof(bol));
 
@@ -276,12 +437,29 @@ bool existPath(int ell[100][3],int n, int u, int v) {
     return false;
 }
 
-void checkIzP() { //megnezi hogy van-e izolalt pont
-    
+bool checkIsolated(int boole[100][100], int n) {
+    for (int i = 1; i <= n; i++) {
+        int count = 0;
+        for (int j = 1; j <= n; j++) {
+            if (boole[i][j])
+                count++;
+        }
+        if (count == 0)
+            return true;
+    }
+    return false;
 }
 
-void PathMat() {
-    //50 old
+void PathMat(int boole[100][100], int n) {
+    for(int k = 1; k <= n; k++) {
+        for(int i = 1; i <= n; i++) {
+            for(int j = 1; j <= n; j++) {
+                if(boole[i][j] == 0) {
+                    boole[i][j] = boole[i][k] * boole[k][j];
+                }
+            }
+        }
+    }
 }
 
 void delVert(int adj[100][100], int n, int cs) {
@@ -311,6 +489,7 @@ int cntDeg(int boole[100][100], int n, int num) {
     return cnt;
 }
 
+//? i = 0 ?????
 void inOutDeg(int adj[100][100], int n,int in[100],int out[100]) {
     for(int i=0;i<n;i++) {
         out[i] = ArrSize(adj[i]);
@@ -319,50 +498,137 @@ void inOutDeg(int adj[100][100], int n,int in[100],int out[100]) {
     }
 }
 
-void checkHamiltGr() {
-
-}
-
-/*
-void bejar(int boole, int n, int cs) {
-    int t[n];
+//^CHECK
+//!!! in main k = 1;
+void checkHamiltGr(int boole[100][100], int n, int k) {
+    int p[100], x[100];
+    memset(p,0,sizeof(p));
+    memset(x,0,sizeof(x));
     for(int i = 1; i <= n; i++) {
-        t[i] = false;
-    }
-    t[cs] = true;
-    for(int j = 1; j <= n; j++) {
-        if(boole[cs][j] == 1 && !(t[j])) {
-            bejar(boole, n, j);
-        } 
+        if(!p[i]) {
+            p[i] = 1;
+            x[k] = i;
+            if(k == 1 || boole[x[k-1]][x[k]]) {
+                if(k == n && boole[x[k]][x[1]] == 1) {
+                    cout << "YES" << endl;
+                    return;
+                } else {
+                    checkHamiltGr(boole, n, k+1);
+                }
+
+            }
+            p[i] = 0;
+        }
     }
 }
 
-bool checkEulGr(int boole[100][100], int n) {
-    bool t[n];
+//^CHECK
+void checkEulerGr(int adj[100][100], int n) {
+    //& WORKS WITH ADJ LIST
+    int in[100];
+    int out[100];
+    inOutDeg(adj,n,in,out);
+
+    int cnt = 0;
+    for(int i=0;i<n;i++) {
+        if(in[i] != out[i]) {
+            cnt++;
+        }
+    }
+
+    if(cnt == 2) {
+        cout << "Eulerian Graph" << endl;
+    } else {
+        cout << "Not an Eulerian Graph" << endl;
+    }
+}
+
+//^CHECK
+void checkBipartite(int adj[100][100], int n) {
+    //& WORKS WITH ADJ LIST
+    int in[100];
+    int out[100];
+    inOutDeg(adj,n,in,out);
+
+    int cnt = 0;
+    for(int i=0;i<n;i++) {
+        if(in[i] != out[i]) {
+            cnt++;
+        }
+    }
+
+    if(cnt == 0) {
+        cout << "Bipartite Graph" << endl;
+    } else {
+        cout << "Not a Bipartite Graph" << endl;
+    }
+}
+
+//^CHECK
+void isCompGraph(int inc[100][100], int n, int m) {
+    //& WORKS WITH INC MATRIX
+    int cnt = 0;
     for(int i = 1; i <= n; i++) {
-        t[i] = false;
+        for(int j = 1; j <= m; j++) {
+            if(inc[i][j] == 1) {
+                cnt++;
+            }
+        }
+    }
+
+    if((cnt/2) == m) {
+        cout << "Complete Graph" << endl;
+    } else {
+        cout << "Not Complete Graph" << endl;
     }
 }
-*/
 
-void checkEvenGr() {
-    //30 old 7)
+//& Check Circle
+bool isCircU(int adj[100][100],int n,int v, bool visited[], int parent) {
+    visited[v] = true;
+    for(int i = 1; i <= n; i++) {
+        if (!visited[i]) {
+            if(isCircU(adj, n, i, visited, v))
+                return true;
+        } else if (i != parent) {
+            return true;
+        }
+    }
+    return false;
 }
 
-void checkRaceGr() {
+bool isCirc(int adj[100][100], int n) {
+    bool visited[n];
+    memset(visited,false,sizeof(visited));
 
+    for (int u = 1; u <= n; u++) {
+        if (visited[u] == true)
+            if (isCircU(adj, n, u, visited, -1)) {
+                return true;
+            }
+    }
+    return false;
 }
 
-void checkFullGr() {
-    //34 old 8)
-}
+//^CHECK
+void checkSCC(int adj[100][100], int n) {
+    //& WORKS WITH ADJ LIST
+    int in[100];
+    int out[100];
+    inOutDeg(adj,n,in,out);
 
-void checkCircGr() {
+    int cnt = 0;
+    for(int i=0;i<n;i++) {
+        if(in[i] != out[i]) {
+            cnt++;
+        }
+    }
 
-}
-
-void checkContGr() {
-    //52 old
+    if(cnt == 0) {
+        cout << "Strongly Connected Graph" << endl;
+    } else {
+        cout << "Not a Strongly Connected Graph" << endl;
+    }
 }
 
 void getCliques(int n, int boole[100][100]) {
