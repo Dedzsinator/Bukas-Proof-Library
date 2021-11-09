@@ -12,7 +12,11 @@ int main() {
             in>>boole[i][j];
         }
     }
-
-    checkHamiltGr(boole,n, 1);
+    
+    if(grIsEulerian(boole, n)) {
+        cout<<"YES";
+    } else {
+        cout<<"NO";
+    }
     return 0;
 }

@@ -16,8 +16,8 @@ template <typename T>
 
 //~ Matrixok atalakitasai
 
-void boolToIncid(int boole[100][100], int n, int inc[100][100]) {
-    int siz = 0;
+//! (main: siz = 0)
+void boolToIncid(int boole[100][100], int n, int inc[100][100], int &siz) {
     for(int i = 1; i <= n; i++) {
         for(int j = 1; j <= i; j++) {
             if(boole[i][j] == 1) {
@@ -64,7 +64,7 @@ void boolToAdj(int boole[100][100], int n, int adj[100][100]) {
     }
 }
 
-//!VISSZATERITI A CSOMOPONTOK SZAMAT A NUM-ON KERESZTUL, (mainben legyen 0)
+//! (main: num = 0)
 void ellToAdj(int ell[100][3], int n, int adj[100][100], int &num) {
     int t[100];
     for(int i = 1; i <= 2*n; i++) {
@@ -166,7 +166,7 @@ void adjToEll(int adj[100][100], int n, int ell[100][3]) {
 
 //~ Bejarasok
 
-void BFS(int boole[30][30],int n, int cs) {
+void grBFS(int boole[30][30],int n, int cs) {
     int first, last, pont;
     int queue[50];
     bool arr[50];
@@ -193,7 +193,7 @@ void BFS(int boole[30][30],int n, int cs) {
     }
 }
 
-void DFS(int boole[30][30],int n, int cs) {
+void grDFS(int boole[30][30],int n, int cs) {
     int stack[30] = {0};
     int visited[30] = {false};
     int top = 1;
@@ -228,7 +228,7 @@ void DFSUtil(int u, int adj[100][100], bool visited[], int n) {
                 DFSUtil(adj[u][i], adj, visited, n);
     }
 
-int GrCTrees(int adj[100][100], int n) {
+int grCntTrees(int adj[100][100], int n) {
     bool visited[n];
     memset(visited,false,sizeof(visited));
     int res = 0;
@@ -276,7 +276,7 @@ bool ellenoriz(int a,int b, int komp[100]) {
     return komp[a] == komp[b];
 }
 
-void GrKruskal(int boole[100][100], int n, int ell[100][4], int m, int ell2[100][3]) {
+void grKruskal(int boole[100][100], int n, int ell[100][4], int m, int ell2[100][3]) {
     int komp[100], k, i;
     boolToEll(boole,n,ell,m);
     BSort(ell, m);
@@ -313,7 +313,7 @@ void printMST(int parent[100], int boole[100][100], int n, int ell[100][3]) {
     }
 }
 
-void GrPrim(int boole[100][100], int n, int ell[100][3]) {
+void grPrim(int boole[100][100], int n, int ell[100][3]) {
     int parent[100];
     int key[100];
     bool mstSet[100];
@@ -339,47 +339,62 @@ void GrPrim(int boole[100][100], int n, int ell[100][3]) {
 //~ Legrovidebb utak
 
 //& Dijkstra
-int minDistance(int dist[], bool sptSet[], int n) {
-    int min = INT_MAX, min_index;
+int miniDist(int dist[100], bool visited[100], int n) {
+    int mini = INT_MAX, min_index;
 
-    for (int v = 1; v <= n; v++)
-        if (sptSet[v] == false && dist[v] <= min)
-            min = dist[v], min_index = v;
+    for (int v = 1; v <= n; v++) {
+        if (visited[v] == false && dist[v] <= mini) {
+            mini = dist[v];
+            min_index = v;
+        }
+    }
 
     return min_index;
 }
 
+void pP(int parent[100], int j) {
+    if (parent[j] == -1)
+        return;
+
+    pP(parent, parent[j]);
+
+    cout << " -> " << j;
+}
+
 void grDijkstra(int boole[100][100], int src, int n) {
     int dist[100];
-    bool sptSet[100];
+    bool visited[100];
+    int parent[100];
 
-    for (int i = 1; i <= n; i++)
-        dist[i] = INT_MAX, sptSet[i] = false;
+    for (int i = 1; i <= n; i++) {
+        dist[i] = INT_MAX;
+        visited[i] = false;
+        parent[i] = -1;
+    }
 
     dist[src] = 0;
 
-    for(int count = 1; count <= n - 1; count++) {
-        int u = minDistance(dist, sptSet, n);
-        sptSet[u] = true;
+    for(int c = 1; c <= n - 1; c++) {
+        int u = miniDist(dist, visited, n);
+        visited[u] = true;
 
-        for (int v = 1; v <= n; v++)
-            if (!sptSet[v] && boole[u][v] && dist[u] != INT_MAX &&
-                dist[u] + boole[u][v] < dist[v])
+        for (int v = 1; v <= n; v++) {
+            if (!visited[v] && boole[u][v] && dist[u] + boole[u][v] < dist[v]) {
+                parent[v] = u;
                 dist[v] = dist[u] + boole[u][v];
-    }
-
-    cout << "Csomopont \tTavolsag a kiinduloponntol" << endl;
-    for (int i = 1; i <= n; i++) {
-        if(dist[i] == INT_MAX) {
-            cout << i << " \t\t" << "INF" << endl;
-        } else {
-            cout << i << " \t\t" << dist[i] << endl;
+            }
         }
+    }
+    cout << "Csomopont\t Tavolsag\tUt" << endl;
+    for (int i = 1; i <= n; i++) {
+        cout << src << " -> " << i << "\t\t " << dist[i] << "\t\t" << src;
+        pP(parent, i);
+        cout << endl;
     }
 }
 
 //& Floyd Warshall
-void grFloydWar(int graph[100][100], int n) {
+void grFloydWarshall(int graph[100][100], int n) {
     //!!! PUT 99 OR BIG NUMBER WHERE SHOULD BE INF
     int dist[100][100], i, j, k;
     for (i = 1; i <= n; i++)
@@ -413,7 +428,17 @@ void grFloydWar(int graph[100][100], int n) {
 
 //~ Spec
 
-bool existPath(int ell[100][4],int n, int u, int v) {
+void grRevDGr(int boole[100][100], int n, int boole2[100][100]) {
+    for(int i = 1; i <= n; i++) {
+        for(int j = 1; j <= n; j++) {
+            if(boole[i][j] == 1) {
+                boole2[j][i] = 1;
+            }
+        }
+    }
+}
+
+bool grExistPath(int ell[100][4],int n, int u, int v) {
     bool bol[n][n];
     memset(bol, false, sizeof(bol));
 
@@ -437,7 +462,7 @@ bool existPath(int ell[100][4],int n, int u, int v) {
     return false;
 }
 
-bool checkIsolated(int boole[100][100], int n) {
+bool grCheckIsolated(int boole[100][100], int n) {
     for (int i = 1; i <= n; i++) {
         int count = 0;
         for (int j = 1; j <= n; j++) {
@@ -450,7 +475,7 @@ bool checkIsolated(int boole[100][100], int n) {
     return false;
 }
 
-void PathMat(int boole[100][100], int n) {
+void grPathMat(int boole[100][100], int n) {
     for(int k = 1; k <= n; k++) {
         for(int i = 1; i <= n; i++) {
             for(int j = 1; j <= n; j++) {
@@ -462,7 +487,7 @@ void PathMat(int boole[100][100], int n) {
     }
 }
 
-void delVert(int adj[100][100], int n, int cs) {
+void grDelVert(int adj[100][100], int n, int cs) {
     //& WORKS WITH ADJ LIST
 
     adj[cs][0] = 0;
@@ -478,7 +503,7 @@ void delVert(int adj[100][100], int n, int cs) {
     }
 }
 
-int cntDeg(int boole[100][100], int n, int num) {
+int grCntDeg(int boole[100][100], int n, int num) {
     int cnt = 0;
     for(int j = 1; j <= n; j++) {
         if(boole[num][j] != 0) {
@@ -490,7 +515,7 @@ int cntDeg(int boole[100][100], int n, int num) {
 }
 
 //? i = 0 ?????
-void inOutDeg(int adj[100][100], int n,int in[100],int out[100]) {
+void grInOutDeg(int adj[100][100], int n,int in[100],int out[100]) {
     for(int i=0;i<n;i++) {
         out[i] = ArrSize(adj[i]);
             for(int j=0;j<ArrSize(adj[i]);j++)
@@ -498,89 +523,118 @@ void inOutDeg(int adj[100][100], int n,int in[100],int out[100]) {
     }
 }
 
-//^CHECK
-//!!! in main k = 1;
-void checkHamiltGr(int boole[100][100], int n, int k) {
-    int p[100], x[100];
-    memset(p,0,sizeof(p));
-    memset(x,0,sizeof(x));
-    for(int i = 1; i <= n; i++) {
-        if(!p[i]) {
-            p[i] = 1;
-            x[k] = i;
-            if(k == 1 || boole[x[k-1]][x[k]]) {
-                if(k == n && boole[x[k]][x[1]] == 1) {
-                    cout << "YES" << endl;
-                    return;
-                } else {
-                    checkHamiltGr(boole, n, k+1);
-                }
+//& Check Hamilton
+bool iS(int v, int boole[100][100], int path[100], int pos, int n) {
+    if (boole[path[pos - 1]][v] == 0)
+        return false;
 
+    for (int i = 1; i <= pos; i++)
+        if (path[i] == v)
+            return false;
+
+    return true;
+}
+
+bool hmCU(int boole[100][100], int path[100], int pos, int n) {
+    if (pos == n+1) {
+        if (boole[path[pos - 1]][path[1]] == 1)
+            return true;
+        else
+            return false;
+    }
+
+    for (int v = 2; v <= n; v++) {
+        if (iS(v, boole, path, pos, n)) {
+            path[pos] = v;
+            if (hmCU(boole, path, pos + 1, n) == true) {
+                return true;
             }
-            p[i] = 0;
+
+            path[pos] = -1;
         }
     }
+    return false;
 }
 
-//^CHECK
-void checkEulerGr(int adj[100][100], int n) {
-    //& WORKS WITH ADJ LIST
-    int in[100];
-    int out[100];
-    inOutDeg(adj,n,in,out);
-
-    int cnt = 0;
-    for(int i=0;i<n;i++) {
-        if(in[i] != out[i]) {
-            cnt++;
-        }
+bool grIsHamiltonian(int boole[100][100], int n) {
+    int path[100];
+    for (int i = 1; i <= n; i++) {
+        path[i] = -1;
     }
 
-    if(cnt == 2) {
-        cout << "Eulerian Graph" << endl;
-    } else {
-        cout << "Not an Eulerian Graph" << endl;
+    path[1] = 1;
+    if (hmCU(boole, path, 2, n) == false ) {
+        cout << "\nNem Hamiltoni kor";
+        return false;
     }
+
+    cout <<"Van Hamiltoni kore: \n";
+    for (int i = 1; i <= n; i++) {
+        cout << path[i] << " ";
+    }
+    cout << path[1] << " ";
+    cout << endl;
+
+    return true;
 }
 
-//^CHECK
-void checkBipartite(int adj[100][100], int n) {
-    //& WORKS WITH ADJ LIST
-    int in[100];
-    int out[100];
-    inOutDeg(adj,n,in,out);
-
-    int cnt = 0;
-    for(int i=0;i<n;i++) {
-        if(in[i] != out[i]) {
-            cnt++;
-        }
+//& Check Eulerian
+//!!!NOT WORKING
+bool grIsEulerian(int boole[100][100],int n) {
+    if(grIsStrongConnect(boole, n) == false) {
+        return false;
     }
 
-    if(cnt == 0) {
-        cout << "Bipartite Graph" << endl;
-    } else {
-        cout << "Not a Bipartite Graph" << endl;
-    }
-}
-
-//^CHECK
-void isCompGraph(int inc[100][100], int n, int m) {
-    //& WORKS WITH INC MATRIX
-    int cnt = 0;
     for(int i = 1; i <= n; i++) {
-        for(int j = 1; j <= m; j++) {
-            if(inc[i][j] == 1) {
-                cnt++;
+        for(int j = 1; j <= n; j++) {
+            if(boole[i][j] != grCntDeg(boole, n, i)) {
+                return false;
             }
         }
     }
+    return true;
+}
 
-    if((cnt/2) == m) {
-        cout << "Complete Graph" << endl;
-    } else {
-        cout << "Not Complete Graph" << endl;
+bool grIsBipartite(int boole[100][100], int n, int src) {
+    int visited[n];
+    for (int i = 1; i <= n; ++i) {
+        visited[i] = -1;
     }
+    visited[src] = 1; 
+
+    queue<int> q;
+    q.push(src);
+
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+
+        if(boole[u][u] == 1) {
+            return false;
+        }
+
+        for (int v = 1; v <= n; ++v) {
+            if (boole[u][v] && visited[v] == -1) {
+                visited[v] = 1 - visited[u];
+                q.push(v);
+
+            } else if (boole[u][v] && visited[v] == visited[u])
+                return false;
+        }
+    }
+
+    return true;
+}
+
+bool GrIsComplete(int boole[100][100], int n) {
+    int inc[100][100], siz = 0;
+    boolToIncid(boole,n, inc, siz);
+    if(siz == n*(n-1)/2) {
+        return true;
+    } else {
+        return false;
+    }
+
 }
 
 //& Check Circle
@@ -597,7 +651,7 @@ bool isCircU(int adj[100][100],int n,int v, bool visited[], int parent) {
     return false;
 }
 
-bool isCirc(int adj[100][100], int n) {
+bool grIsCyclic(int adj[100][100], int n) {
     bool visited[n];
     memset(visited,false,sizeof(visited));
 
@@ -610,25 +664,43 @@ bool isCirc(int adj[100][100], int n) {
     return false;
 }
 
-//^CHECK
-void checkSCC(int adj[100][100], int n) {
-    //& WORKS WITH ADJ LIST
-    int in[100];
-    int out[100];
-    inOutDeg(adj,n,in,out);
+//& Check for strongly connected comps
+void ut(int v, bool visited[100], int n) {
+    visited[v] = true;
+    for(int i = 1; i <= n; i++) {
+        if(!visited[i]) {
+            ut(i, visited, n);
+        }
+    }
+}
 
-    int cnt = 0;
-    for(int i=0;i<n;i++) {
-        if(in[i] != out[i]) {
-            cnt++;
+bool grIsStrongConnect(int boole[100][100], int n) {
+    int boole2[100][100];
+    memset(boole2, false, sizeof(boole2));
+    bool visited[n];
+    memset(visited,false,sizeof(visited));
+
+    ut(1, visited, n);
+
+    for(int i = 1; i <= n; i++) {
+        if(visited[i] == false) {
+            return false;
         }
     }
 
-    if(cnt == 0) {
-        cout << "Strongly Connected Graph" << endl;
-    } else {
-        cout << "Not a Strongly Connected Graph" << endl;
+    grRevDGr(boole, n, boole2);
+
+    memset(visited,false,sizeof(visited));
+
+    ut(1, visited, n);
+
+    for(int i = 1; i <= n; i++) {
+        if(visited[i] == false) {
+            return false;
+        }
     }
+
+    return true;
 }
 
 void getCliques(int n, int boole[100][100]) {
