@@ -11,7 +11,7 @@ int main() {
     int arr[] = {10,20,30,40,50,60,70};
     int lim = 1;
     int scal = 5;
-    
+
     ArrElemNtoK(arr,2, 2, result);
     ArrPrint(result,0,ArrSize(result));
     //ArrRange(lim,scal,1, result);
