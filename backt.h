@@ -6,30 +6,42 @@ ifstream f("atjar.be");
 
 //**  PERM/COMB/VAR  */
 
-void Cinit(int k, int v[100]) {
-    if(k>1) {
-        v[k] = v[k-1];
+void PVCinit(int k, int v[100], int r = -1) {
+    if(r == -1) {
+        if(k>1) {
+            v[k] = v[k-1];
+        } else {
+            v[k] = k-1;
+        }
     } else {
-        v[k] = k-1;
+        v[k] = 0;
     }
 }
 
-void Ckiir(int k, int v[100]) {
+void PVCkiir(int k, int v[100]) {
     for(int i = 1; i <= k; i++) {
         cout<<v[i] << " ";
     }
     cout<<endl;
 }
 
-bool Ckov(int k, int v[100], int n, int r) {
-    if(v[k] < n-r+k) {
-        v[k]++;
-        return true;
+bool PVCkov(int k, int v[100], int n, int r = -1) {
+    if(r == -1) {
+        if(v[k] < n) {
+            v[k]++;
+            return true;
+        }
+        return false;
+    } else {
+        if(v[k] < n-r+k) {
+            v[k]++;
+            return true;
+        }
+        return false;
     }
-    return false;
 }
 
-bool Cellen(int k, int v[100]) {
+bool PVCellen(int k, int v[100]) {
     for(int i = 1; i < k; i++) {
         if(v[k] == v[i]) {
             return false;
@@ -38,66 +50,18 @@ bool Cellen(int k, int v[100]) {
     return true;
 }
 
-bool Vellen(int k, int v[100]) {
-    for(int i = 1; i < k; i++) {
-        if(v[k] == v[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool Vkov(int k, int v[100], int n, int r) {
-    if(v[k] < n) {
-        v[k]++;
-        return true;
-    }
-    return false;
-}
-
-void Vkiir(int k, int v[100]) {
-    for(int i = 1; i <= k; i++) {
-        cout<<v[i] << " ";
-    }
-    cout<<endl;
-}
-
-bool Pellen(int k, int v[100]) {
-    for(int i = 1; i < k; i++) {
-        if(v[k] == v[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool Pkov(int k, int v[100], int n) {
-    if(v[k] < n) {
-        v[k]++;
-        return true;
-    }
-    return false;
-}
-
-void Pkiir(int k, int v[100]) {
-    for(int i = 1; i <= k; i++) {
-        cout<<v[i] << " ";
-    }
-    cout<<endl;
-}
-
-void backComp(int n, int r) {
+void backPVC(int n, int r) {
     int v[100], k;
     k = 1;
-    Cinit(k, v);
+    PVCinit(k, v);
     while(k > 0) {
-        if(Ckov(k, v, n, r)) {
-            if(Cellen(k, v)) {
+        if(PVCkov(k, v, n, r)) {
+            if(PVCellen(k, v)) {
                 if(k == r) {
-                    Ckiir(k, v);
+                    PVCkiir(k, v);
                 } else {
                     k++;
-                    Cinit(k, v);
+                    PVCinit(k, v);
                 }
             }
         } else {
@@ -106,45 +70,6 @@ void backComp(int n, int r) {
     }
 }
 
-void backVar(int n, int r) {
-    int v[100], k;
-    k = 1;
-    v[k] = 0;
-    while(k > 0) {
-        if(Vkov(k, v, n, r)) {
-            if(Vellen(k, v)) {
-                if(k == r) {
-                    Vkiir(k, v);
-                } else {
-                    k++;
-                    v[k] = 0;
-                }
-            }
-        } else {
-            k--;
-        }
-    }
-}
-
-void backPerm(int n) {
-    int v[100], k;
-    k = 1;
-    v[k] = 0;
-    while(k > 0) {
-        if(Pkov(k, v, n)) {
-            if(Pellen(k, v)) {
-                if(k == n) {
-                    Pkiir(k, v);
-                } else {
-                    k++;
-                    v[k] = 0;
-                }
-            }
-        } else {
-            k--;
-        }
-    }
-}
 
 //**  PERM/COMB/VAR  */
 
@@ -845,8 +770,6 @@ void kiirNums(int k, int v[100]) {
     cout << endl;
 }
 
-
-
 //* SZAMFELBONTAS */
 
 //* RESZGRAF */
@@ -867,4 +790,9 @@ void kiirNums(int k, int v[100]) {
 
 //* PARANTHESIS */
 
+//* MAZE */
+
+
+
+//* MAZE */
 #endif
