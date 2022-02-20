@@ -2204,9 +2204,21 @@ typedef struct stack_struct{
         }
     }
 
-    int Top() {
+    int top() {
         return top->data;
     }
+
+    int size() {
+        int size = 0;
+        stack_node *temp = top;
+
+        while (temp != NULL) {
+            size++;
+            temp = temp->first;
+        }
+        return size;
+    }
+
 } STACK;
 
 //ANCHOR: //** QUEUE !!! */
