@@ -192,6 +192,21 @@ void spagettiSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
   cout<<"W.I.P"<<endl;
 }
 
+void grailSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
+  cout<<"W.I.P"<<endl;
+}
+
+void americanFlagSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
+  cout<<"W.I.P"<<endl;
+}
+
+void sqrtSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
+  cout<<"W.I.P"<<endl;
+}
+
+void shelfSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
+  cout<<"W.I.P"<<endl;
+}
 //!----------------------------------------------
 
 void bucketSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {

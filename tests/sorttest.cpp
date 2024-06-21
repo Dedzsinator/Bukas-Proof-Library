@@ -34,7 +34,7 @@ class Timer {
 };
 
 vector<string> types = {"constant", "asc", "desc", "smallrange", "random"};
-vector<string> names= {"copy", "bubble", "merge", "quick", "inertion", "ska", "shell", "bucket", "radix", "magyar", "heap", "tim", "tree", "count", "std", "skacopy"};
+vector<string> names= {"copy", "bubble", "merge", "quick", "inertion", "ska", "shell", "bucket", "radix", "magyar", "heap", "tim", "tree", "count", "std", "skacopy", "grail", "sqrt", "flag", "spagetti", "shelf"};
 
 vector<int> geninputs(const string& type) {
   srand(time(0));
@@ -87,12 +87,12 @@ int main() {
             Timer t;
             if(names[i] == "copy") {
                 //!memcopy
-              vector<int> inputCopyReference; 
-              inputCopyReference.resize(input.size()); 
-              Timer t; 
-              copy(input.begin(), input.end(), inputCopyReference.begin()); 
-              durations[i] = t.getDuration(); 
-              executedFlags[i] = true; 
+                vector<int> inputCopyReference; 
+                inputCopyReference.resize(input.size()); 
+                Timer t; 
+                copy(input.begin(), input.end(), inputCopyReference.begin()); 
+                durations[i] = t.getDuration(); 
+                executedFlags[i] = true; 
             } else if (names[i] == "bubble") {
                 //sorts.bubbleSort(inputCopy.begin(), inputCopy.end());
                 //executedFlags[i] = true; 
@@ -137,6 +137,21 @@ int main() {
                 executedFlags[i] = true;
             } else if(names[i] == "std") {
                 sort(inputCopy.begin(), inputCopy.end());
+                executedFlags[i] = true;
+            } else if(names[i] == "grail") {
+                grailSort(inputCopy.begin(), inputCopy.end());
+                executedFlags[i] = true;
+            } else if(names[i] == "sqrt") {
+                sqrtSort(n, inputCopy.begin(), inputCopy.end());
+                executedFlags[i] = true;
+            } else if(names[i] == "flag") {
+                americanFlagSort(inputCopy.begin(), inputCopy.end());
+                executedFlags[i] = true;
+            } else if(names[i] == "spagetti") {
+                spagettiSort(inputCopy.begin(), inputCopy.end());
+                executedFlags[i] = true;
+            } else if(names[i] == "shelf") {
+                shelfSort(inputCopy.begin(), inputCopy.end());
                 executedFlags[i] = true;
             }
             durations[i] = t.getDuration();
