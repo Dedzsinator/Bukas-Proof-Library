@@ -1,12 +1,69 @@
 #pragma once
 
-#include "../../headers/Graphs/graph.hpp"
 #include <queue>
+#include <vector>
+#include <iostream>
 #include <stack>
 #include <limits.h>
-  //headers
-  template <typename T>
-  void Graph<T>::addNode(size_t id, size_t dim) {
+#include <algorithm>
+
+template<typename T>
+class Graph {
+private:
+  template<typename U>
+  class Node {
+  public:
+    size_t id;
+    size_t dim;
+    std::vector<size_t> neighbors;
+    
+    Node(size_t id) {
+      this->id = id;
+      this->dim = 0;
+    }
+    
+    Node(size_t id, size_t dim) {
+      this->id = id;
+      this->dim = dim;
+    }
+  };
+
+  std::vector<Node<T>> nodes;
+
+public:
+  Graph() {}
+
+  Graph(std::vector<std::vector<size_t>> adjMatrix) {
+    for (size_t i = 0; i < adjMatrix.size(); i++) {
+      Node<T> node(i);
+      nodes.push_back(node);
+    }
+    for (size_t i = 0; i < adjMatrix.size(); i++) {
+      for (size_t j = 0; j < adjMatrix[i].size(); j++) {
+        if (adjMatrix[i][j] == 1) {
+          nodes[i].neighbors.push_back(j);
+        }
+      }
+    }
+  }
+
+  Graph(std::vector<std::vector<size_t>> incMatrix, bool inc) {
+    for (size_t i = 0; i < incMatrix.size(); i++) {
+      Node<T> node(i);
+      nodes.push_back(node);
+    }
+    for (size_t i = 0; i < incMatrix.size(); i++) {
+      for (size_t j = 0; j < incMatrix[i].size(); j++) {
+        if (incMatrix[i][j] == 1) {
+          nodes[i].neighbors.push_back(j);
+        }
+      }
+    }
+  }
+
+  //more constructors
+
+  void addNode(size_t id, size_t dim) {
     if (dim == 0) {
       Node<T> node(id);
       nodes.push_back(node);
@@ -15,13 +72,13 @@
       nodes.push_back(node);
     }
   }
-  template <typename T>
-  void Graph<T>::addEdge(size_t id1, size_t id2) {
+  
+  void addEdge(size_t id1, size_t id2) {
     nodes[id1].neighbors.push_back(id2);
     nodes[id2].neighbors.push_back(id1);
   }
-  template <typename T>
-  void Graph<T>::removeNode(size_t id) {
+  
+  void removeNode(size_t id) {
     nodes.erase(nodes.begin() + id);
     for (size_t i = 0; i < nodes.size(); i++) {
       for (size_t j = 0; j < nodes[i].neighbors.size(); j++) {
@@ -31,8 +88,8 @@
       }
     }
   }
-  template <typename T>
-  void Graph<T>::removeEdge(size_t id1, size_t id2) {
+  
+  void removeEdge(size_t id1, size_t id2) {
     for (size_t i = 0; i < nodes[id1].neighbors.size(); i++) {
       if (nodes[id1].neighbors[i] == id2) {
         nodes[id1].neighbors.erase(nodes[id1].neighbors.begin() + i);
@@ -44,8 +101,8 @@
       }
     }
   }
-  template <typename T>
-  void Graph<T>::printGraph() {
+  
+  void printGraph() {
     for (size_t i = 0; i < nodes.size(); i++) {
       std::cout << "Node " << nodes[i].id << ": ";
       for (size_t j = 0; j < nodes[i].neighbors.size(); j++) {
@@ -54,30 +111,30 @@
       std::cout << std::endl;
     }
   }
-  template <typename T>
-  void Graph<T>::printNode(size_t id) {
+  
+  void printNode(size_t id) {
     std::cout << "Node " << nodes[id].id << ": ";
     for (size_t i = 0; i < nodes[id].neighbors.size(); i++) {
       std::cout << nodes[id].neighbors[i] << " ";
     }
     std::cout << std::endl;
   }
-  template <typename T>
-  void Graph<T>::printNeighbors(size_t id) {
+  
+  void printNeighbors(size_t id) {
     std::cout << "Node " << nodes[id].id << ": ";
     for (size_t i = 0; i < nodes[id].neighbors.size(); i++) {
       std::cout << nodes[id].neighbors[i] << " ";
     }
     std::cout << std::endl;
   }
-  template <typename T>
-  void Graph<T>::printDegree(size_t id) {
+  
+  void printDegree(size_t id) {
     std::cout << "Node " << nodes[id].id << " has degree " << nodes[id].neighbors.size() << std::endl;
   }
 
   //transformings into other data structures
-  template <typename T>
-  std::vector<std::vector<size_t>> Graph<T>::toAdjacencyMatrix() {
+  
+  std::vector<std::vector<size_t>> toAdjacencyMatrix() {
     std::vector<std::vector<size_t>> adjMatrix(nodes.size(), std::vector<size_t>(nodes.size(), 0));
     for (size_t i = 0; i < nodes.size(); i++) {
       for (size_t j = 0; j < nodes[i].neighbors.size(); j++) {
@@ -86,8 +143,8 @@
     }
     return adjMatrix;
   }
-  template <typename T>
-  std::vector<std::vector<size_t>> Graph<T>::toAdjacencyList() {
+  
+  std::vector<std::vector<size_t>> toAdjacencyList() {
     std::vector<std::vector<size_t>> adjList(nodes.size());
     for (size_t i = 0; i < nodes.size(); i++) {
       for (size_t j = 0; j < nodes[i].neighbors.size(); j++) {
@@ -96,8 +153,8 @@
     }
     return adjList;
   }
-  template <typename T>
-  std::vector<std::vector<size_t>> Graph<T>::toIncidenceMatrix() {
+  
+  std::vector<std::vector<size_t>> toIncidenceMatrix() {
     std::vector<std::vector<size_t>> incMatrix(nodes.size(), std::vector<size_t>(nodes.size(), 0));
     for (size_t i = 0; i < nodes.size(); i++) {
       for (size_t j = 0; j < nodes[i].neighbors.size(); j++) {
@@ -106,8 +163,8 @@
     }
     return incMatrix;
   }
-  template <typename T>
-  std::vector<std::vector<size_t>> Graph<T>::toIncidenceList() {
+  
+  std::vector<std::vector<size_t>> toIncidenceList() {
     std::vector<std::vector<size_t>> incList(nodes.size());
     for (size_t i = 0; i < nodes.size(); i++) {
       for (size_t j = 0; j < nodes[i].neighbors.size(); j++) {
@@ -118,8 +175,8 @@
   }
   
   //traversals
-  template <typename T>
-  std::vector<size_t> Graph<T>::BFS(size_t id) {
+  
+  std::vector<size_t> BFS(size_t id) {
     std::vector<size_t> bfs;
     std::vector<bool> visited(nodes.size(), false);
     std::queue<size_t> q;
@@ -138,8 +195,8 @@
     }
     return bfs;
   }
-  template <typename T>
-  std::vector<size_t> Graph<T>::DFS(size_t id) {
+  
+  std::vector<size_t> DFS(size_t id) {
     std::vector<size_t> dfs;
     std::vector<bool> visited(nodes.size(), false);
     std::stack<size_t> s;
@@ -158,8 +215,8 @@
     }
     return dfs;
   }
-  template <typename T>
-  std::vector<size_t> Graph<T>::kOrderNeighbors(size_t id, size_t k) {
+  
+  std::vector<size_t> kOrderNeighbors(size_t id, size_t k) {
     std::vector<size_t> kOrder;
     std::vector<bool> visited(nodes.size(), false);
     std::queue<size_t> q;
@@ -182,8 +239,8 @@
     }
     return kOrder;
   }
-  template <typename T>
-  std::vector<size_t> Graph<T>::levelOrder(size_t id) {
+  
+  std::vector<size_t> levelOrder(size_t id) {
     std::vector<size_t> levelOrder;
     std::vector<bool> visited(nodes.size(), false);
     std::queue<size_t> q;
@@ -204,8 +261,8 @@
   }
 
   //topo sort util 
-  template <typename T>
-  void Graph<T>::topologicalSortUtil(size_t id, std::vector<bool> &visited, std::stack<size_t> &s) {
+  
+  void topologicalSortUtil(size_t id, std::vector<bool> &visited, std::stack<size_t> &s) {
     visited[id] = true;
     for (size_t i = 0; i < nodes[id].neighbors.size(); i++) {
       if (!visited[nodes[id].neighbors[i]]) {
@@ -215,8 +272,8 @@
     s.push(id);
   }
 
-  template <typename T>
-  std::vector<size_t> Graph<T>::topologicalSort() {
+  
+  std::vector<size_t> topologicalSort() {
     std::vector<size_t> topological;
     std::vector<bool> visited(nodes.size(), false);
     std::stack<size_t> s;
@@ -233,8 +290,8 @@
   }
   
   //shortest paths
-  template <typename T>
-  std::vector<size_t> Graph<T>::Dijkstra(size_t id1, size_t id2) {
+  
+  std::vector<size_t> Dijkstra(size_t id1, size_t id2) {
     std::vector<size_t> dijkstra;
     std::vector<size_t> dist(nodes.size(), INT_MAX);
     std::vector<size_t> prev(nodes.size(), -1);
@@ -262,8 +319,8 @@
     std::reverse(dijkstra.begin(), dijkstra.end());
     return dijkstra;
   }
-  template <typename T>
-  std::vector<size_t> Graph<T>::BellmanFord(size_t id1, size_t id2) {
+  
+  std::vector<size_t> BellmanFord(size_t id1, size_t id2) {
     std::vector<size_t> bellmanFord;
     std::vector<size_t> dist(nodes.size(), INT_MAX);
     std::vector<size_t> prev(nodes.size(), -1);
@@ -288,8 +345,8 @@
     std::reverse(bellmanFord.begin(), bellmanFord.end());
     return bellmanFord;
   }
-  template <typename T>
-  std::vector<size_t> Graph<T>::FloydWarshall() {
+  
+  std::vector<size_t> FloydWarshall() {
     std::vector<std::vector<size_t>> dist(nodes.size(), std::vector<size_t>(nodes.size(), INT_MAX));
     for (size_t i = 0; i < nodes.size(); i++) {
       dist[i][i] = 0;
@@ -316,8 +373,8 @@
   }
   
   //calc distance matrix for shortest paths
-  template <typename T>
-  std::vector<size_t> Graph<T>::DijkstraDistanceMatrix() {
+  
+  std::vector<size_t> DijkstraDistanceMatrix() {
     std::vector<size_t> distMatrix;
     for (size_t i = 0; i < nodes.size(); i++) {
       std::vector<size_t> dist(nodes.size(), INT_MAX);
@@ -345,8 +402,8 @@
     return distMatrix;
   }
 
-  template <typename T>
-  std::vector<size_t> Graph<T>::Johnson() {
+  
+  std::vector<size_t> Johnson() {
     std::vector<size_t> johnson;
     std::vector<size_t> dist(nodes.size(), INT_MAX);
     std::vector<size_t> prev(nodes.size(), -1);
@@ -374,8 +431,8 @@
   }
   
   //minimum spanning trees
-  template <typename T>
-  std::vector<size_t> Graph<T>::Prim() {
+  
+  std::vector<size_t> Prim() {
     std::vector<size_t> prim;
     std::vector<size_t> dist(nodes.size(), INT_MAX);
     std::vector<size_t> prev(nodes.size(), -1);
@@ -402,8 +459,8 @@
     }
     return prim;
   }
-  template <typename T>
-  std::vector<size_t> Graph<T>::Kruskal() {
+  
+  std::vector<size_t> Kruskal() {
     std::vector<size_t> kruskal;
     std::vector<std::pair<size_t, std::pair<size_t, size_t>>> edges;
     for (size_t i = 0; i < nodes.size(); i++) {
@@ -429,9 +486,19 @@
     return kruskal;
   }
 
+  //boruvka
+  std::vector<size_t> Boruvka {
+
+  }
+
+  //reverse delete algorithm
+  std::vector<size_t> ReverseDelete() {
+
+  }
+
   //max Flow
-  template <typename T>
-  std::vector<size_t> Graph<T>::FordFulkerson() {
+  
+  std::vector<size_t> FordFulkerson() {
     std::vector<size_t> fordFulkerson;
     std::vector<std::vector<size_t>> adjMatrix = toAdjacencyMatrix();
     std::vector<std::vector<size_t>> rGraph = adjMatrix;
@@ -478,8 +545,8 @@
     }
     return fordFulkerson;
   }
-  template <typename T>
-  std::vector<size_t> Graph<T>::EdmondsKarp() {
+  
+  std::vector<size_t> EdmondsKarp() {
     std::vector<size_t> edmondsKarp;
     std::vector<std::vector<size_t>> adjMatrix = toAdjacencyMatrix();
     std::vector<std::vector<size_t>> rGraph = adjMatrix;
@@ -526,67 +593,69 @@
     }
     return edmondsKarp;
   }
-  template <typename T>
-  std::vector<size_t> Graph<T>::Dinic() {}
-  template <typename T>
-  std::vector<size_t> Graph<T>::PushRelabel() {}
+  
+  std::vector<size_t> BoykovKolmongorov() {}
+
+  std::vector<size_t> Dinic() {}
+  
+  std::vector<size_t> PushRelabel() {}
   
   //connectivity
-  template <typename T>
-  std::vector<size_t> Graph<T>::ConnectedComponents() {}
-  template <typename T>
-  std::vector<size_t> Graph<T>::StronglyConnectedComponents() {}
-  template <typename T>
-  std::vector<size_t> Graph<T>::ArticulationPoints() {}
-  template <typename T>
-  std::vector<size_t> Graph<T>::Bridges() {}
+  
+  std::vector<size_t> ConnectedComponents() {}
+  
+  std::vector<size_t> StronglyConnectedComponents() {}
+  
+  std::vector<size_t> ArticulationPoints() {}
+  
+  std::vector<size_t> Bridges() {}
 
   //other
-  template <typename T>
-  std::vector<size_t> Graph<T>::EulerianPath() {}
-  template <typename T>
-  std::vector<size_t> Graph<T>::HamiltonianPath() {}
+  
+  std::vector<size_t> EulerianPath() {}
+  
+  std::vector<size_t> HamiltonianPath() {}
 
   //coloring
-  template <typename T>
-  std::vector<size_t> Graph<T>::GreedyColoring() {}
-  template <typename T>
-  std::vector<size_t> Graph<T>::WelshPowell() {}
+  
+  std::vector<size_t> GreedyColoring() {}
+  
+  std::vector<size_t> WelshPowell() {}
 
   //matching
-  template <typename T>
-  std::vector<size_t> Graph<T>::HopcroftKarp() {}
-  template <typename T>
-  std::vector<size_t> Graph<T>::EdmondsBlossom() {}
+  
+  std::vector<size_t> HopcroftKarp() {}
+  
+  std::vector<size_t> EdmondsBlossom() {}
 
   //planarity
-  template <typename T>
-  std::vector<size_t> Graph<T>::BoyerMyrvold() {}
-  template <typename T>
-  std::vector<size_t> Graph<T>::Kuratowski() {}
+  
+  std::vector<size_t> BoyerMyrvold() {}
+  
+  std::vector<size_t> Kuratowski() {}
 
   //Flow
-  template <typename T>
-  std::vector<size_t> Graph<T>::MaxFlow() {}
-  template <typename T>
-  std::vector<size_t> Graph<T>::MinCostMaxFlow() {}
-  template <typename T>
-  std::vector<size_t> Graph<T>::MaxFlowMinCost() {}
-  template <typename T>
-  std::vector<size_t> Graph<T>::MinCostFlow() {}
+  
+  std::vector<size_t> MaxFlow() {}
+  
+  std::vector<size_t> MinCostMaxFlow() {}
+  
+  std::vector<size_t> MaxFlowMinCost() {}
+  
+  std::vector<size_t> MinCostFlow() {}
 
   //clustering
-  template <typename T>
-  std::vector<size_t> Graph<T>::KMeans() {}
-  template <typename T>
-  std::vector<size_t> Graph<T>::DBScan() {}
+  
+  std::vector<size_t> KMeans() {}
+  
+  std::vector<size_t> DBScan() {}
 
   //community detection
-  template <typename T>
-  std::vector<size_t> Graph<T>::Louvain() {}
+  
+  std::vector<size_t> Louvain() {}
 
   //centrality
-  template <typename T>
+  
   std::vector<size_t> DegreeCentrality() {
     std::vector<size_t> degreeCentrality;
     for (size_t i = 0; i < nodes.size(); i++) {
@@ -596,7 +665,7 @@
   }
 
   //ranking
-  template <typename T>
+  
   std::vector<size_t> PageRank() {
     std::vector<size_t> pageRank;
     std::vector<size_t> outDegree(nodes.size(), 0);
@@ -614,7 +683,7 @@
   }
 
   //betweenness
-  template <typename T>
+  
   std::vector<size_t> Brandes() {
     std::vector<size_t> brandes;
     std::vector<std::vector<size_t>> adjList = toAdjacencyList();
@@ -663,7 +732,7 @@
   }
 
   //closeness
-  template <typename T>
+  
   std::vector<size_t> Closeness() {
     std::vector<size_t> closeness;
     std::vector<std::vector<size_t>> distMatrix = DijkstraDistanceMatrix();
@@ -678,7 +747,7 @@
   }
 
   //eccentricity
-  template <typename T>
+  
   std::vector<size_t> Eccentricity() {
     std::vector<size_t> eccentricity;
     std::vector<std::vector<size_t>> distMatrix = DijkstraDistanceMatrix();
@@ -695,7 +764,7 @@
   }
 
   //diameter
-  template <typename T>
+  
   std::vector<size_t> Diameter() {
     std::vector<size_t> diameter;
     std::vector<std::vector<size_t>> distMatrix = DijkstraDistanceMatrix();
@@ -712,7 +781,7 @@
   }
 
   //radius
-  template <typename T>
+  
   std::vector<size_t> Radius() {
     std::vector<size_t> radius;
     std::vector<std::vector<size_t>> distMatrix = DijkstraDistanceMatrix();
@@ -729,7 +798,7 @@
   }
 
   //chinese postman
-  template <typename T>
+  
   std::vector<size_t> ChinesePostman() {
     std::vector<size_t> chinesePostman;
     std::vector<std::vector<size_t>> adjMatrix = toAdjacencyMatrix();
@@ -770,7 +839,7 @@
   }
 
   //traveling salesman
-  template <typename T>
+  
   std::vector<size_t> TravelingSalesman() {
     //use 3opt
     std::vector<size_t> travelingSalesman;
@@ -796,7 +865,7 @@
   }
 
   //graph coloring
-  template <typename T>
+  
   std::vector<size_t> GraphColoring() {
     std::vector<size_t> graphColoring;
     std::vector<std::vector<size_t>> adjMatrix = toAdjacencyMatrix();
@@ -824,7 +893,7 @@
   }
 
   //cromatic number
-  template <typename T>
+  
   std::vector<size_t> ChromaticNumber() {
     std::vector<size_t> chromaticNumber;
     std::vector<std::vector<size_t>> adjMatrix = toAdjacencyMatrix();
@@ -856,7 +925,7 @@
   }
 
   //graph isomorphism with another Graph
-  template <typename T>
+  
   std::vector<size_t> GraphIsomorphism(Graph<T> g) {
     std::vector<size_t> graphIsomorphism;
     std::vector<std::vector<size_t>> adjMatrix1 = toAdjacencyMatrix();
@@ -889,7 +958,7 @@
   }
 
   //cromatic polynomial
-  template <typename T>
+  
   std::vector<size_t> ChromaticPolynomial() {
     std::vector<size_t> chromaticPolynomial;
     std::vector<std::vector<size_t>> adjMatrix = toAdjacencyMatrix();
@@ -936,7 +1005,7 @@
   }
 
   //prufer encoding
-  template <typename T>
+  
   std::vector<size_t> PruferEncoding() {
     std::vector<size_t> pruferEncoding;
     std::vector<std::vector<size_t>> adjList = toAdjacencyList();
@@ -966,7 +1035,7 @@
   }
 
   //prufer decoding
-  template <typename T>
+  
   std::vector<size_t> PruferDecoding() {
     std::vector<size_t> pruferDecoding;
     std::vector<std::vector<size_t>> adjList = toAdjacencyList();
@@ -996,7 +1065,7 @@
   }
 
   //graph complement
-  template <typename T>
+  
   std::vector<size_t> GraphComplement() {
     std::vector<size_t> graphComplement;
     std::vector<std::vector<size_t>> adjMatrix = toAdjacencyMatrix();
@@ -1017,7 +1086,7 @@
   }
 
   //get dual Graph
-  template <typename T>
+  
   std::vector<size_t> DualGraph() {
     std::vector<size_t> dualGraph;
     std::vector<std::vector<size_t>> adjMatrix = toAdjacencyMatrix();
@@ -1038,7 +1107,7 @@
   }
 
   //huffman
-  template <typename T>
+  
   std::vector<size_t> Huffman() {
     std::vector<size_t> huffman;
     std::vector<std::vector<size_t>> adjMatrix = toAdjacencyMatrix();
@@ -1067,7 +1136,7 @@
   }
 
   //hungarian algorithm
-  template <typename T>
+  
   std::vector<size_t> Hungarian() {
     std::vector<size_t> hungarian;
     std::vector<std::vector<size_t>> adjMatrix = toAdjacencyMatrix();
@@ -1121,7 +1190,7 @@
   }
 
   //graph matching
-  template <typename T>
+  
   std::vector<pair<size_t, size_t> GraphMatching() {
     //give back the mathing edges pairs
     std::vector<std::pair<size_t, size_t>> graphMatching;
@@ -1191,8 +1260,8 @@
     return graphMatching;
   }
   //propery detection
-  template <typename T>
-  bool Graph<T>::isEulerian() {
+  
+  bool isEulerian() {
     std::vector<size_t> degree = DegreeCentrality();
     for (size_t i = 0; i < nodes.size(); i++) {
       if (degree[i] % 2 != 0) {
@@ -1202,8 +1271,8 @@
     return true;
   }
 
-  template <typename T>
-  bool Graph<T>::isHamiltonian() {
+  
+  bool isHamiltonian() {
     std::vector<size_t> degree = DegreeCentrality();
     for (size_t i = 0; i < nodes.size(); i++) {
       if (degree[i] < nodes.size() / 2) {
@@ -1213,8 +1282,8 @@
     return true;
   }
 
-  template <typename T>
-  bool Graph<T>::isPlanar() {
+  
+  bool isPlanar() {
     std::vector<size_t> degree = DegreeCentrality();
     for (size_t i = 0; i < nodes.size(); i++) {
       if (degree[i] > 5) {
@@ -1224,8 +1293,8 @@
     return true;
   }
 
-  template <typename T>
-  bool Graph<T>::isBipartite() {
+  
+  bool isBipartite() {
     std::vector<size_t> color = GraphColoring();
     for (size_t i = 0; i < nodes.size(); i++) {
       for (size_t j = 0; j < nodes[i].neighbors.size(); j++) {
@@ -1237,8 +1306,8 @@
     return true;
   }
 
-  template <typename T>
-  bool Graph<T>::isComplete() {
+  
+  bool isComplete() {
     std::vector<size_t> degree = DegreeCentrality();
     for (size_t i = 0; i < nodes.size(); i++) {
       if (degree[i] != nodes.size() - 1) {
@@ -1248,8 +1317,8 @@
     return true;
   }
 
-  template <typename T>
-  bool Graph<T>::isTree() {
+  
+  bool isTree() {
     std::vector<size_t> degree = DegreeCentrality();
     size_t edges = 0;
     for (size_t i = 0; i < nodes.size(); i++) {
@@ -1262,8 +1331,8 @@
     return false;
   }
 
-  template <typename T>
-  bool Graph<T>::isForest() {
+  
+  bool isForest() {
     std::vector<size_t> degree = DegreeCentrality();
     size_t edges = 0;
     for (size_t i = 0; i < nodes.size(); i++) {
@@ -1276,8 +1345,8 @@
     return false;
   }
 
-  template <typename T>
-  bool Graph<T>::isRegular() {
+  
+  bool isRegular() {
     std::vector<size_t> degree = DegreeCentrality();
     for (size_t i = 0; i < nodes.size(); i++) {
       if (degree[i] != degree[0]) {
@@ -1287,8 +1356,8 @@
     return true;
   }
 
-  template <typename T>
-  bool Graph<T>::isCyclic() {
+  
+  bool isCyclic() {
     std::vector<size_t> degree = DegreeCentrality();
     for (size_t i = 0; i < nodes.size(); i++) {
       if (degree[i] != 2) {
@@ -1298,8 +1367,8 @@
     return true;
   }
 
-  template <typename T>
-  bool Graph<T>::isAcyclic() {
+  
+  bool isAcyclic() {
     std::vector<size_t> degree = DegreeCentrality();
     for (size_t i = 0; i < nodes.size(); i++) {
       if (degree[i] != 1) {
@@ -1309,8 +1378,8 @@
     return true;
   }
   
-  template <typename T>
-  bool Graph<T>::isWeighted() {
+  
+  bool isWeighted() {
     for (size_t i = 0; i < nodes.size(); i++) {
       for (size_t j = 0; j < nodes[i].neighbors.size(); j++) {
         if (nodes[i].weights[j] == 0) {
@@ -1321,8 +1390,8 @@
     return true;
   }
 
-  template <typename T>
-  bool Graph<T>::isDirected() {
+  
+  bool isDirected() {
     for (size_t i = 0; i < nodes.size(); i++) {
       for (size_t j = 0; j < nodes[i].neighbors.size(); j++) {
         if (nodes[nodes[i].neighbors[j]].neighbors[i] != i) {
@@ -1333,7 +1402,7 @@
     return true;
   }
   
-  template <typename T>
+  
   bool isDAG() {
     std::vector<size_t> degree = DegreeCentrality();
     for (size_t i = 0; i < nodes.size(); i++) {
@@ -1344,8 +1413,8 @@
     return true;
   }
 
-  template <typename T>
-  bool Graph<T>::isConnected() {
+  
+  bool isConnected() {
     std::vector<size_t> degree = DegreeCentrality();
     for (size_t i = 0; i < nodes.size(); i++) {
       if (degree[i] == 0) {
@@ -1355,8 +1424,8 @@
     return true;
   }
 
-  template <typename T>
-  bool Graph<T>::isStronglyConnected() {
+  
+  bool isStronglyConnected() {
     std::vector<size_t> degree = DegreeCentrality();
     for (size_t i = 0; i < nodes.size(); i++) {
       if (degree[i] == 0) {
@@ -1366,8 +1435,8 @@
     return true;
   }
 
-  template <typename T>
-  bool Graph<T>::isBiconnected() {
+  
+  bool isBiconnected() {
     std::vector<size_t> degree = DegreeCentrality();
     for (size_t i = 0; i < nodes.size(); i++) {
       if (degree[i] == 0) {
@@ -1377,8 +1446,8 @@
     return true;
   }
 
-  template <typename T>
-  bool Graph<T>::isNPartite() {
+  
+  bool isNPartite() {
     std::vector<size_t> color = GraphColoring();
     size_t n = 0;
     for (size_t i = 0; i < nodes.size(); i++) {
@@ -1395,3 +1464,4 @@
     }
     return true;
   }
+};
