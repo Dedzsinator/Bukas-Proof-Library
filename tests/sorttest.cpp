@@ -1,9 +1,7 @@
 #include <algorithm> 
 #include <chrono>
 #include <iostream>
-#include <sys/sysinfo.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
 #include <string>
@@ -34,7 +32,7 @@ class Timer {
 };
 
 vector<string> types = {"constant", "asc", "desc", "smallrange", "random"};
-vector<string> names= {"copy", "bubble", "merge", "quick", "inertion", "ska", "shell", "bucket", "radix", "magyar", "heap", "tim", "tree", "count", "std", "skacopy", "grail", "sqrt", "flag", "spagetti", "shelf"};
+vector<string> names= {"copy", "bubble", "merge", "quick", "inertion", "ska", "shell", "bucket", "radix", "magyar", "heap", "tim", "tree", "count", "std", "skacopy", "grail", "sqrt", "flag", "spagetti", "shelf", "stable"};
 
 vector<int> geninputs(const string& type) {
   srand(time(0));
@@ -87,10 +85,7 @@ int main() {
             Timer t;
             if(names[i] == "copy") {
                 //!memcopy
-                vector<int> inputCopyReference; 
-                inputCopyReference.resize(input.size()); 
-                Timer t; 
-                copy(input.begin(), input.end(), inputCopyReference.begin()); 
+                memcpy(inputCopy.begin(), inputCopy.end(), inputCopy.begin());
                 durations[i] = t.getDuration(); 
                 executedFlags[i] = true; 
             } else if (names[i] == "bubble") {
@@ -152,6 +147,9 @@ int main() {
                 executedFlags[i] = true;
             } else if(names[i] == "shelf") {
                 shelfSort(inputCopy.begin(), inputCopy.end());
+                executedFlags[i] = true;
+            } else if(names[i] == "stable") {
+                std::stable_sort(inputCopy.begin(), inputCopy.end());
                 executedFlags[i] = true;
             }
             durations[i] = t.getDuration();

@@ -188,16 +188,74 @@ void smoothSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
   cout<<"W.I.P"<<endl;
 }
 
-void spagettiSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
-  cout<<"W.I.P"<<endl;
+void spaghettiSort(Iterator begin, Iterator end, Compare comp = COMPARE()) {
+    using ValueType = typename std::iterator_traits<Iterator>::value_type;
+    
+    if (begin == end) return;
+
+    auto minmax = std::minmax_element(begin, end, comp);
+    ValueType minValue = *minmax.first;
+    ValueType maxValue = *minmax.second;
+
+    std::vector<std::vector<ValueType>> holes(std::distance(minValue, maxValue) + 1);
+
+    for (auto it = begin; it != end; ++it) {
+        holes[*it - minValue].push_back(*it);
+    }
+
+    auto current = begin;
+    for (auto& hole : holes) {
+        for (auto& value : hole) {
+            *current++ = value;
+        }
+    }
 }
 
 void grailSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
   cout<<"W.I.P"<<endl;
 }
 
-void americanFlagSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
-  cout<<"W.I.P"<<endl;
+int getDigit(T value, int place, int base) {
+    return (value / place) % base;
+}
+
+auto getMaxValue(Iterator begin, Iterator end) {
+    return *std::max_element(begin, end);
+}
+
+void americanFlagSort(Iterator begin, Iterator end, Compare comp = COMPARE()) {
+    using ValueType = typename std::iterator_traits<Iterator>::value_type;
+    
+    if (begin == end) return;
+    
+    const int base = 10;
+    auto maxValue = getMaxValue(begin, end);
+
+    int maxDigits = 0;
+    while (maxValue != 0) {
+        maxValue /= base;
+        maxDigits++;
+    }
+
+    std::vector<ValueType> output(std::distance(begin, end));
+    for (int place = 1; maxDigits > 0; place *= base, --maxDigits) {
+        std::vector<int> count(base, 0);
+        for (auto it = begin; it != end; ++it) {
+            int digit = getDigit(*it, place, base);
+            count[digit]++;
+        }
+
+        for (int i = 1; i < base; ++i) {
+            count[i] += count[i - 1];
+        }
+
+        for (auto it = std::make_reverse_iterator(end); it != std::make_reverse_iterator(begin); ++it) {
+            int digit = getDigit(*it, place, base);
+            output[--count[digit]] = *it;
+        }
+
+        std::copy(output.begin(), output.end(), begin);
+    }
 }
 
 void sqrtSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
