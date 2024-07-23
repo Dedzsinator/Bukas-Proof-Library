@@ -103,7 +103,9 @@
         "types.h": "c",
         "fcntl.h": "c",
         "unistd.h": "c",
-        "text_encoding": "cpp"
+        "text_encoding": "cpp",
+        "generator": "cpp",
+        "print": "cpp"
     },
     "C_Cpp.default.compilerPath": "C:\\MinGW\\bin\\g++.exe"
 }

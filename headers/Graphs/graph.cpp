@@ -33,6 +33,13 @@ private:
 public:
   Graph() {}
 
+  Graph(int n) {
+    for (size_t i = 0; i < n; i++) {
+      Node<T> node(i);
+      nodes.push_back(node);
+    }
+  }
+
   Graph(std::vector<std::vector<size_t>> adjMatrix) {
     for (size_t i = 0; i < adjMatrix.size(); i++) {
       Node<T> node(i);
@@ -61,18 +68,34 @@ public:
     }
   }
 
-  //more constructors
-
-  void addNode(size_t id, size_t dim) {
-    if (dim == 0) {
-      Node<T> node(id);
-      nodes.push_back(node);
-    } else {
-      Node<T> node(id, dim);
+  Graph(std::vector<std::vector<size_t>> edgeList) {
+    for (size_t i = 0; i < edgeList.size(); i++) {
+      Node<T> node(edgeList[i][0]);
       nodes.push_back(node);
     }
+    for (size_t i = 0; i < edgeList.size(); i++) {
+      nodes[edgeList[i][0]].neighbors.push_back(edgeList[i][1]);
+      nodes[edgeList[i][1]].neighbors.push_back(edgeList[i][0]);
+    }
   }
-  
+
+  Graph(std::vector<std::vector<size_t>> adjList, bool adj) {
+    for (size_t i = 0; i < adjList.size(); i++) {
+      Node<T> node(i);
+      nodes.push_back(node);
+    }
+    for (size_t i = 0; i < adjList.size(); i++) {
+      for (size_t j = 0; j < adjList[i].size(); j++) {
+        nodes[i].neighbors.push_back(adjList[i][j]);
+      }
+    }
+  }
+
+  void addNode(size_t id) {
+    Node<T> node(id);
+    nodes.push_back(node);
+  }
+
   void addEdge(size_t id1, size_t id2) {
     nodes[id1].neighbors.push_back(id2);
     nodes[id2].neighbors.push_back(id1);
@@ -133,47 +156,7 @@ public:
   }
 
   //transformings into other data structures
-  
-  std::vector<std::vector<size_t>> toAdjacencyMatrix() {
-    std::vector<std::vector<size_t>> adjMatrix(nodes.size(), std::vector<size_t>(nodes.size(), 0));
-    for (size_t i = 0; i < nodes.size(); i++) {
-      for (size_t j = 0; j < nodes[i].neighbors.size(); j++) {
-        adjMatrix[i][nodes[i].neighbors[j]] = 1;
-      }
-    }
-    return adjMatrix;
-  }
-  
-  std::vector<std::vector<size_t>> toAdjacencyList() {
-    std::vector<std::vector<size_t>> adjList(nodes.size());
-    for (size_t i = 0; i < nodes.size(); i++) {
-      for (size_t j = 0; j < nodes[i].neighbors.size(); j++) {
-        adjList[i].push_back(nodes[i].neighbors[j]);
-      }
-    }
-    return adjList;
-  }
-  
-  std::vector<std::vector<size_t>> toIncidenceMatrix() {
-    std::vector<std::vector<size_t>> incMatrix(nodes.size(), std::vector<size_t>(nodes.size(), 0));
-    for (size_t i = 0; i < nodes.size(); i++) {
-      for (size_t j = 0; j < nodes[i].neighbors.size(); j++) {
-        incMatrix[i][nodes[i].neighbors[j]] = 1;
-      }
-    }
-    return incMatrix;
-  }
-  
-  std::vector<std::vector<size_t>> toIncidenceList() {
-    std::vector<std::vector<size_t>> incList(nodes.size());
-    for (size_t i = 0; i < nodes.size(); i++) {
-      for (size_t j = 0; j < nodes[i].neighbors.size(); j++) {
-        incList[i].push_back(nodes[i].neighbors[j]);
-      }
-    }
-    return incList;
-  }
-  
+
   //traversals
   
   std::vector<size_t> BFS(size_t id) {
@@ -402,6 +385,32 @@ public:
     return distMatrix;
   }
 
+  std::vector<size_t> FloydWarshallDistanceMatrix() {
+    std::vector<std::vector<size_t>> dist(nodes.size(), std::vector<size_t>(nodes.size(), INT_MAX));
+    for (size_t i = 0; i < nodes.size(); i++) {
+      dist[i][i] = 0;
+      for (size_t j = 0; j < nodes[i].neighbors.size(); j++) {
+        dist[i][nodes[i].neighbors[j]] = 1;
+      }
+    }
+    for (size_t k = 0; k < nodes.size(); k++) {
+      for (size_t i = 0; i < nodes.size(); i++) {
+        for (size_t j = 0; j < nodes.size(); j++) {
+          if (dist[i][k] + dist[k][j] < dist[i][j]) {
+            dist[i][j] = dist[i][k] + dist[k][j];
+          }
+        }
+      }
+    }
+    std::vector<size_t> floydWarshall;
+    for (size_t i = 0; i < nodes.size(); i++) {
+      for (size_t j = 0; j < nodes.size(); j++) {
+        floydWarshall.push_back(dist[i][j]);
+      }
+    }
+    return floydWarshall;
+  }
+
   
   std::vector<size_t> Johnson() {
     std::vector<size_t> johnson;
@@ -487,14 +496,10 @@ public:
   }
 
   //boruvka
-  std::vector<size_t> Boruvka {
-
-  }
+  std::vector<size_t> Boruvka() {}
 
   //reverse delete algorithm
-  std::vector<size_t> ReverseDelete() {
-
-  }
+  std::vector<size_t> ReverseDelete() {}
 
   //max Flow
   
@@ -1191,7 +1196,8 @@ public:
 
   //graph matching
   
-  std::vector<pair<size_t, size_t> GraphMatching() {
+  /*
+  std::vector<std::pair<size_t, size_t>> GraphMatching() {
     //give back the mathing edges pairs
     std::vector<std::pair<size_t, size_t>> graphMatching;
     std::vector<std::vector<size_t>> adjMatrix = toAdjacencyMatrix();
@@ -1259,6 +1265,8 @@ public:
 
     return graphMatching;
   }
+
+  */
   //propery detection
   
   bool isEulerian() {
