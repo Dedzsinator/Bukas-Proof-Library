@@ -13,7 +13,7 @@ protected:
     };
 
     Node* root;
-   
+    
 public: 
     virtual Node* getNode(Node* node, const T& data) const {
         if (node == nullptr) {
