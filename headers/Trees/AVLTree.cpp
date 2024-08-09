@@ -1,10 +1,14 @@
 #pragma once 
 
-#include "../../headers/Trees/narySearchTree.cpp"
-
 template <typename T> 
 class AVLTree {
-    using Node = typename NaryTree<T>::Node;
+    struct Node {
+        vector<T> data;
+        vector<Node*> children;
+        bool leaf;
+
+        Node(bool leaf) : leaf(leaf) {}
+    };
     
     Node* root;
 
@@ -54,6 +58,50 @@ public:
       }
     }
     
+    void insert(const T& data) {
+        
+        if(root == nullptr) {
+          root = new Node;
+          root->data = data;
+          root->parent = nullptr;
+          root->firstChild = nullptr;
+          root->nextSibling = nullptr;
+        } else {
+          
+          if(data < root->data) {
+            
+            if(root->firstChild == nullptr) {
+              
+              Node* newNode = new Node;
+              newNode->data = data;
+              newNode->parent = root;
+              newNode->firstChild = nullptr;
+              newNode->nextSibling = nullptr;
+              
+              root->firstChild = newNode;
+            } else {
+              
+              insert(root->firstChild, data);
+            }
+          } else {
+            
+            if(root->nextSibling == nullptr) {
+              
+              Node* newNode = new Node;
+              newNode->data = data;
+              newNode->parent = root;
+              newNode->firstChild = nullptr;
+              newNode->nextSibling = nullptr;
+              
+              root->nextSibling = newNode;
+            } else {
+              
+              insert(root->nextSibling, data);
+            }
+          }
+        }
+    }
+
     void remove(Node* node, const T& data) {
       
       if(node == nullptr) {
@@ -152,6 +200,11 @@ public:
       }
     }
 
+    void print() const {
+      
+      print(root, 0);
+    }
+
     
     void print(Node* node, int depth) const {
       
@@ -171,6 +224,28 @@ public:
       }
     }
 
+    //pretty print the tree to see the structure
+    void prettyPrint() const {
+      
+      prettyPrint(root, 0);
+    }
+
+    void prettyPrint(Node* node, int depth) const {
+      
+      if(node == nullptr) {
+        return;
+      } else {
+        
+        prettyPrint(node->nextSibling, depth + 1);
+        
+        for(int i = 0; i < depth; i++) {
+          std::cout << "  ";
+        }
+        std::cout << node->data << std::endl;
+        
+        prettyPrint(node->firstChild, depth + 1);
+      }
+    }
     
     Node* search(Node* node, const T& data) {
       
