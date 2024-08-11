@@ -58,26 +58,27 @@ public:
         }
     }
 
-    void remove(T value) {
+    bool remove(T value) {
         Node* current = head;
-        Node* prev = nullptr;
+        Node* previous = nullptr;
         while (current != nullptr) {
             if (current->value == value) {
-                if (prev == nullptr) {
+                if (previous == nullptr) {
                     head = current->next;
                 } else {
-                    prev->next = current->next;
+                    previous->next = current->next;
                 }
                 delete current;
                 --count;
-                return;
+                return true;
             }
-            prev = current;
+            previous = current;
             current = current->next;
         }
+        return false;
     }
 
-    bool contains(T value) {
+    bool contains(T value) const{
         Node* current = head;
         while (current != nullptr) {
             if (current->value == value) {

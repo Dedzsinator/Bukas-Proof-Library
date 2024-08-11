@@ -1,331 +1,562 @@
 #pragma once
 #include <iostream>
-using namespace std;
+#include <cmath>
+#include <algorithm>
 
 template<class T>
-class Vector {
-private:
-    size_t size;
-    T* data;
+class SparseVector;
 
+template<class T>
+class Vector
+{
 public:
-    Vector() {
-        size = 0;
-        data = nullptr;
-    }
+	Vector();
+    Vector(size_t size);
+    Vector(size_t size, const T& val);
+    Vector(const Vector<T>& other);
+    Vector<T>& operator=(const Vector<T>& other);
+    ~Vector();
 
-    Vector(size_t size) {
-        size = size;
-        data = new T[size]();
-        for(int i = 0; i < size; i++) {
-            data[i] = 1;
-        }
-    }
+    void push_back(const T& value);
+    void pop_back();
+    size_t size() const;
+    size_t capacity() const;
+    void resize(size_t newSize, T val = T());
 
-    Vector(size_t size, const T& val) {
-        size = size;
-        data = new T[size];
-        std::fill(data, data + size, val);
-    }
+    const T& operator[](size_t index) const;
+    T& operator[](int index);
+    Vector<T> operator+(const Vector<T>& other);
+    Vector<T> operator-(const Vector<T>& other);
+    double operator*(const Vector<T>& other);
+    double operator~();
+    double operator%(const Vector<T>& other);
+    T operator[](int index) const;
 
-    Vector(const Vector<T>& other) {
-        size = other.size;
-        data = new T[size];
-        std::copy(other.data, other.data + size, data);
-    }
+    void print();
+    operator SparseVector<T>();
+	template<class U>
+    friend std::ostream& operator<<(std::ostream& os, const Vector<U>& v);
 
-
-    Vector<T>& operator=(const Vector<T>& other) {
-        if (this != &other) {
-            delete[] data;
-            size = other.size;
-            data = new T[size];
-            std::copy(other.data, other.data + size, data);
-        }
-        return *this;
-    }
-
-
-    void push_back(const T& value) {
-        T* new_t = new T[size + 1];
-        std::copy(data, data + size, new_t);
-        delete[] data;
-        data = new_t;
-        data[size++] = value;
-    }
-
-
-    void pop_back() {
-        if (size > 0) {
-            T* new_t = new T[--size];
-            std::copy(data, data + size, new_t);
-            delete[] data;
-            data = new_t;
-        }
-    }
-
-
-    size_t getSize() const {
-        return size;
-    }
-
-
-    void resize(size_t newSize, T val) {
-        T* new_t = new T[newSize];
-        size_t minSize = size < newSize ? size : newSize;
-        std::copy(data, data + minSize, new_t);
-        if (newSize > size) {
-            std::fill(new_t + size, new_t + newSize, val);
-        }
-        delete[] data;
-        data = new_t;
-        size = newSize;
-    }
-
-    ~Vector() {
-        delete[] data;
-    }
-
-
-    Vector<T> operator+(const Vector<T>& other) {
-        if (size != other.size) {
-            throw "Hiba! A vektorok dimenziója nem egyezik!";
-        }
-
-        Vector<T> result(size);
-        for (int i = 0; i < size; i++) {
-            result.data[i] = data[i] + other.data[i];
-        }
-
-        return result;
-    }
-
-
-    Vector<T> operator-(const Vector<T>& other) {
-        if (size != other.size) {
-            throw "Hiba! A vektorok dimenziója nem egyezik!";
-        }
-
-        Vector<T> result(size);
-        for (int i = 0; i < size; i++) {
-            result.data[i] = data[i] - other.data[i];
-        }
-
-        return result;
-    }
-
-
-    double operator*(const Vector<T>& other) {
-        if (size != other.size) {
-            throw "Hiba! A vektorok dimenziója nem egyezik!";
-        }
-
-        double result = 0;
-        for (int i = 0; i < size; i++) {
-            result += data[i] * other.data[i];
-        }
-
-        return result;
-    }
-
-
-    T& operator[](int index) {
-        if (index < 0 || index >= this->size) {
-            throw "Rossz index!";
-        }
-        return this->data[index];
-    }
-
-
-    T operator[](int index) const {
-        if (index < 0 || index >= size) {
-            throw "Hiba! Rossz index!";
-        }
-
-        return data[index];
-    }
-
-
-    void print() {
-        std::cout << *this;
-    }
-
+private:
+	T*  m_t;
+	int m_dim;
+    
 };
 
 template<class T>
-class SparseVector {
-    struct pair {
-        size_t index;
-        T value;
-    };
+std::ostream& operator<<(std::ostream& os, const Vector<T>& v) {
+        for (int i = 0; i < v.m_dim; i++) {
+            os << v.m_t[i] << " ";
+        }
+        return os;
+}
+
+template < class T >
+struct nonZero
+{
+	T elem;
+	int index;
+};
+
+
+template<class T>
+class SparseVector
+{
+public:
+
+	operator Vector<T>();
+	SparseVector();
+	SparseVector(int dim);
+	SparseVector(T *t, int dim);
+	SparseVector(const SparseVector&);
+    ~SparseVector();
+	int getDim() const;
+
+	void push(T elem, int index);
+	SparseVector operator+(const SparseVector&);
+	SparseVector operator-(const SparseVector&);
+	SparseVector<T>& operator=(const SparseVector<T>&);
+	void pop();
+	double operator*(const SparseVector&);
+	double operator~();
+	double operator%(const SparseVector&);
+	template<class U>
+	friend std::ostream& operator<<(std::ostream& os, const SparseVector<U>& v);
+	T      operator[](int) const;
+	void print();
+
 
 private:
-    size_t size;
-    pair* data;
 
-public:
-    SparseVector() {
-        size = 0;
-        data = nullptr;
+
+	nonZero <T> * vektor;
+	int nZeroDim;
+	int dim;
+};
+
+template<class T>
+std::ostream& operator<<(std::ostream& os, const SparseVector<T>& rv) {
+    for (int i = 0; i < rv.nZeroDim; i++) {
+        os << "(" << rv.vektor[i].elem << ", " << rv.vektor[i].index << ") ";
+    }
+    return os;
+}
+
+template<class T>
+Vector<T>::Vector() {
+    m_dim = 0;
+    m_t = nullptr;
+}
+
+template<class T>
+Vector<T>::Vector(size_t size) {
+    m_dim = size;
+    m_t = new T[m_dim]();
+    for(int i = 0; i < m_dim; i++) {
+        m_t[i] = 1;
+    }
+}
+
+template<class T>
+Vector<T>::Vector(size_t size, const T& val) {
+    m_dim = size;
+    m_t = new T[m_dim];
+    std::fill(m_t, m_t + m_dim, val);
+}
+
+template<class T>
+Vector<T>::Vector(const Vector<T>& other) {
+    m_dim = other.m_dim;
+    m_t = new T[m_dim];
+    std::copy(other.m_t, other.m_t + m_dim, m_t);
+}
+
+template<class T>
+Vector<T>& Vector<T>::operator=(const Vector<T>& other) {
+    if (this != &other) {
+        delete[] m_t;
+        m_dim = other.m_dim;
+        m_t = new T[m_dim];
+        std::copy(other.m_t, other.m_t + m_dim, m_t);
+    }
+    return *this;
+}
+
+template<class T>
+void Vector<T>::push_back(const T& value) {
+    T* new_t = new T[m_dim + 1];
+    std::copy(m_t, m_t + m_dim, new_t);
+    delete[] m_t;
+    m_t = new_t;
+    m_t[m_dim++] = value;
+}
+
+template<class T>
+void Vector<T>::pop_back() {
+    if (m_dim > 0) {
+        T* new_t = new T[--m_dim];
+        std::copy(m_t, m_t + m_dim, new_t);
+        delete[] m_t;
+        m_t = new_t;
+    }
+}
+
+template<class T>
+size_t Vector<T>::size() const {
+    return m_dim;
+}
+
+template<class T>
+void Vector<T>::resize(size_t newSize, T val) {
+    T* new_t = new T[newSize];
+    size_t minSize = m_dim < newSize ? m_dim : newSize;
+    std::copy(m_t, m_t + minSize, new_t);
+    if (newSize > m_dim) {
+        std::fill(new_t + m_dim, new_t + newSize, val);
+    }
+    delete[] m_t;
+    m_t = new_t;
+    m_dim = newSize;
+}
+
+template<class T>
+Vector<T>::~Vector() {
+    delete[] m_t;
+}
+
+template<class T>
+Vector<T> Vector<T>::operator+(const Vector<T>& other) {
+    if (m_dim != other.m_dim) {
+        throw "Hiba! A vektorok dimenziója nem egyezik!";
     }
 
-    SparseVector(size_t size) {
-        size = size;
-        data = new pair[size];
+    Vector<T> result(m_dim);
+    for (int i = 0; i < m_dim; i++) {
+        result.m_t[i] = m_t[i] + other.m_t[i];
     }
 
-    SparseVector(size_t size, const T& val) {
-        size = size;
-        data = new pair[size];
-        for (int i = 0; i < size; i++) {
-            data[i].index = i;
-            data[i].value = val;
+    return result;
+}
+
+template<class T>
+Vector<T> Vector<T>::operator-(const Vector<T>& other) {
+    if (m_dim != other.m_dim) {
+        throw "Hiba! A vektorok dimenziója nem egyezik!";
+    }
+
+    Vector<T> result(m_dim);
+    for (int i = 0; i < m_dim; i++) {
+        result.m_t[i] = m_t[i] - other.m_t[i];
+    }
+
+    return result;
+}
+
+template<class T>
+double Vector<T>::operator*(const Vector<T>& other) {
+    if (m_dim != other.m_dim) {
+        throw "Hiba! A vektorok dimenziója nem egyezik!";
+    }
+
+    double result = 0;
+    for (int i = 0; i < m_dim; i++) {
+        result += m_t[i] * other.m_t[i];
+    }
+
+    return result;
+}
+
+template<class T>
+double Vector<T>::operator~() {
+    double result = 0;
+
+    for (int i = 0; i < m_dim; i++) {
+        result += m_t[i] * m_t[i];
+    }
+
+    return sqrt(result);
+}
+
+template<class T>
+double Vector<T>::operator%(const Vector<T>& other) {
+    return ~(*this - other);
+}
+
+template<class T>
+T& Vector<T>::operator[](int index) {
+    if (index < 0 || index >= this->m_dim) {
+        throw "Rossz index!";
+    }
+    return this->m_t[index];
+}
+
+template<class T>
+T Vector<T>::operator[](int index) const {
+    if (index < 0 || index >= m_dim) {
+        throw "Hiba! Rossz index!";
+    }
+
+    return m_t[index];
+}
+
+template<class T>
+void Vector<T>::print() {
+    std::cout << *this;
+}
+
+template<class T>
+Vector<T>::operator SparseVector<T>() {
+    SparseVector<T> rv;
+    
+    for (size_t i = 0; i < this->m_dim; i++) {
+        if (this->m_t[i] != 0) {
+            rv.push(this->m_t[i], i);
+        }
+    }
+    return rv;
+}
+
+template<class T>
+SparseVector<T>::operator Vector<T>() {
+    int max_index = 0;
+    for (int i = 0; i < this->nZeroDim; i++) {
+        if (this->vektor[i].index > max_index) {
+            max_index = this->vektor[i].index;
         }
     }
 
-    SparseVector(const SparseVector<T>& other) {
-        size = other.size;
-        data = new pair[size];
-        std::copy(other.data, other.data + size, data);
+    Vector<T> v(max_index + 1);
+    for (int i = 0; i <= max_index; i++) {
+        v[i] = 0;
+    }
+    for (int i = 0; i < this->nZeroDim; i++) {
+        v[this->vektor[i].index] = this->vektor[i].elem;
+    }
+    return v;
+}
+
+template<class T>
+SparseVector<T>::SparseVector() {
+    this->dim = 0;
+    this->nZeroDim = 0;
+    this->vektor = new nonZero<T>[0];
+}
+
+template<class T>
+SparseVector<T>::SparseVector(int dim) {
+    this->dim = dim;
+    this->nZeroDim = 1;
+    this->vektor = new nonZero<T>[dim];
+    this->vektor[0].index = 0;
+    this->vektor[0].elem = 1;
+    for (int i = 1; i < dim; i++) {
+        this->vektor[i].index = i;
+        this->vektor[i].elem = 0;
+    } 
+}
+
+template<class T>
+SparseVector<T>::SparseVector(T *t, int dim) {
+    this->dim = dim;
+    for (int i = 0; i < dim; i++) {
+        if (t[i] != 0) {
+            this->data[i] = t[i];
+        }
+    }
+}
+
+template<class T>
+SparseVector<T>::SparseVector(const SparseVector<T>& other) {
+    this->dim = other.dim;
+    this->nZeroDim = other.nZeroDim;
+    this->vektor = new nonZero<T>[this->dim];
+    for (int i = 0; i < this->nZeroDim; i++) {
+        this->vektor[i] = other.vektor[i];
+    }
+}
+
+template<class T>
+SparseVector<T>::~SparseVector() {
+    delete[] vektor;
+}
+
+template<class T>
+int SparseVector<T>::getDim() const {
+    return this->dim;
+}
+
+template<class T>
+void SparseVector<T>::push(T elem, int index) {
+
+    if (elem == 0) {
+        return;
     }
 
-    SparseVector<T>& operator=(const SparseVector<T>& other) {
-        if (this != &other) {
-            delete[] data;
-            size = other.size;
-            data = new pair[size];
-            std::copy(other.data, other.data + size, data);
+    if (this->nZeroDim >= this->dim || this->vektor == nullptr) {
+        this->dim = (this->dim == 0) ? 1 : this->dim * 2;
+        nonZero<T>* newVektor = new nonZero<T>[this->dim];
+        for (int i = 0; i < this->nZeroDim; i++) {
+            newVektor[i] = this->vektor[i];
         }
+        delete[] this->vektor;
+        this->vektor = newVektor;
+    }
+
+    int i = this->nZeroDim - 1;
+    while (i >= 0 && this->vektor[i].index > index) {
+        this->vektor[i + 1] = this->vektor[i];
+        i--;
+    }
+    this->vektor[i + 1].index = index;
+    this->vektor[i + 1].elem = elem;
+    this->nZeroDim++;
+}
+
+template<class T>
+void SparseVector<T>::pop() {
+    if (this->nZeroDim == 0) {
+        return;
+    }
+    this->nZeroDim--;
+}
+
+template<class T>
+SparseVector<T>& SparseVector<T>::operator=(const SparseVector<T>& other) {
+    if (this == &other) {
         return *this;
     }
 
-    void push_back(const T& value) {
-        pair* new_t = new pair[size + 1];
-        std::copy(data, data + size, new_t);
-        delete[] data;
-        data = new_t;
-        data[size].index = size;
-        data[size++].value = value;
+    this->dim = other.dim;
+    this->nZeroDim = other.nZeroDim;
+    delete[] this->vektor;
+    this->vektor = new nonZero<T>[this->dim];
+    for (int i = 0; i < this->nZeroDim; i++) {
+        this->vektor[i] = other.vektor[i];
+    }
+    return *this;
+}
+
+template<class T>
+SparseVector<T> SparseVector<T>::operator+(const SparseVector<T>& other) {
+    if (this->dim != other.dim) {
+        throw "Eltero dimenziok!";
     }
 
-    void pop_back() {
-        if (size > 0) {
-            pair* new_t = new pair[--size];
-            std::copy(data, data + size, new_t);
-            delete[] data;
-            data = new_t;
-        }
-    }
+    SparseVector<T> result(this->dim);
+    result.nZeroDim = 0;
 
-    size_t getSize() const {
-        return size;
-    }
-
-    void resize(size_t newSize, T val) {
-        pair* new_t = new pair[newSize];
-        size_t minSize = size < newSize ? size : newSize;
-        std::copy(data, data + minSize, new_t);
-        if (newSize > size) {
-            for (int i = size; i < newSize; i++) {
-                new_t[i].index = i;
-                new_t[i].value = val;
+    int i = 0, j = 0;
+    while (i < this->nZeroDim && j < other.nZeroDim) {
+        if (this->vektor[i].index < other.vektor[j].index) {
+            result.push(this->vektor[i].elem, this->vektor[i].index);
+            i++;
+        } else if (this->vektor[i].index > other.vektor[j].index) {
+            result.push(other.vektor[j].elem, other.vektor[j].index);
+            j++;
+        } else {
+            T sum = this->vektor[i].elem + other.vektor[j].elem;
+            if (sum != 0) {
+                result.push(sum, this->vektor[i].index);
             }
+            i++;
+            j++;
         }
-        delete[] data;
-        data = new_t;
-        size = newSize;
     }
 
-    ~SparseVector() {
-        delete[] data;
+    while (i < this->nZeroDim) {
+        result.push(this->vektor[i].elem, this->vektor[i].index);
+        i++;
     }
 
-    SparseVector<T> operator+(const SparseVector<T>& other) {
-        if (size != other.size) {
-            throw "Hiba! A vektorok dimenziója nem egyezik!";
-        }
-
-        SparseVector<T> result(size);
-        for (int i = 0; i < size; i++) {
-            result.data[i].index = data[i].index;
-            result.data[i].value = data[i].value + other.data[i].value;
-        }
-
-        return result;
+    while (j < other.nZeroDim) {
+        result.push(other.vektor[j].elem, other.vektor[j].index);
+        j++;
     }
 
-    SparseVector<T> operator-(const SparseVector<T>& other) {
-        if (size != other.size) {
-            throw "Hiba! A vektorok dimenziója nem egyezik!";
-        }
+    return result;
+}
 
-        SparseVector<T> result(size);
-        for (int i = 0; i < size; i++) {
-            result.data[i].index = data[i].index;
-            result.data[i].value = data[i].value - other.data[i].value;
-        }
-
-        return result;
+template<class T>
+SparseVector<T> SparseVector<T>::operator-(const SparseVector<T>& other) {
+    if (this->dim != other.dim) {
+        throw "Eltero dimenziok!";
     }
 
-    double operator*(const SparseVector<T>& other) {
-        if (size != other.size) {
-            throw "Hiba! A vektorok dimenziója nem egyezik!";
-        }
+    SparseVector<T> result(this->dim);
+    result.nZeroDim = 0;
 
-        double result = 0;
-        for (int i = 0; i < size; i++) {
-            result += data[i].value * other.data[i].value;
+    int i = 0, j = 0;
+    while (i < this->nZeroDim && j < other.nZeroDim) {
+        if (this->vektor[i].index < other.vektor[j].index) {
+            result.push(this->vektor[i].elem, this->vektor[i].index);
+            i++;
+        } else if (this->vektor[i].index > other.vektor[j].index) {
+            result.push(-other.vektor[j].elem, other.vektor[j].index);
+            j++;
+        } else {
+            T diff = this->vektor[i].elem - other.vektor[j].elem;
+            if (diff != 0) {
+                result.push(diff, this->vektor[i].index);
+            }
+            i++;
+            j++;
         }
-
-        return result;
     }
 
-    T& operator[](int index) {
-        if (index < 0 || index >= this->size) {
-            throw "Rossz index!";
+    while (i < this->nZeroDim) {
+        result.push(this->vektor[i].elem, this->vektor[i].index);
+        i++;
+    }
+
+    while (j < other.nZeroDim) {
+        result.push(-other.vektor[j].elem, other.vektor[j].index);
+        j++;
+    }
+
+    return result;
+}
+
+template<class T>
+double SparseVector<T>::operator*(const SparseVector& rv) {
+    if (this->dim != rv.dim) {
+        throw "Eltero dimenziok!";
+    }
+    double result = 0;
+    int i = 0, j = 0;
+    while (i < this->nZeroDim && j < rv.nZeroDim) {
+        if (this->vektor[i].index < rv.vektor[j].index) {
+            i++;
+        } else if (this->vektor[i].index > rv.vektor[j].index) {
+            j++;
+        } else {
+            result += this->vektor[i].elem * rv.vektor[j].elem;
+            i++;
+            j++;
         }
-        return this->data[index].value;
+    }
+    return result;
+}
+
+template<class T>
+double SparseVector<T>::operator%(const SparseVector& rv) {
+    if (this->dim != rv.dim) {
+        throw "Eltero dimenziok!";
     }
 
-    T operator[](int index) const {
-        if (index < 0 || index >= size) {
-            throw "Hiba! Rossz index!";
+    double result = 0;
+
+    int i = 0, j = 0;
+    while (i < this->nZeroDim && j < rv.nZeroDim) {
+        if (this->vektor[i].index < rv.vektor[j].index) {
+            result += this->vektor[i].elem * this->vektor[i].elem;
+            i++;
+        } else if (this->vektor[i].index > rv.vektor[j].index) {
+            result += rv.vektor[j].elem * rv.vektor[j].elem;
+            j++;
+        } else {
+            double diff = this->vektor[i].elem - rv.vektor[j].elem;
+            result += diff * diff;
+            i++;
+            j++;
         }
-
-        return data[index].value;
     }
 
-    void print() {
-        std::cout << *this;
+    while (i < this->nZeroDim) {
+        result += this->vektor[i].elem * this->vektor[i].elem;
+        i++;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const SparseVector<T>& v) {
-        for (int i = 0; i < v.size; i++) {
-            os << v.data[i].index << ": " << v.data[i].value << std::endl;
+    while (j < rv.nZeroDim) {
+        result += rv.vektor[j].elem * rv.vektor[j].elem;
+        j++;
+    }
+
+    return std::sqrt(result);
+}
+
+template<class T>
+double SparseVector<T>::operator~() {
+    double result = 0;
+    for (int i = 0; i < this->nZeroDim; i++) {
+        result += this->vektor[i].elem * this->vektor[i].elem;
+    }
+    return std::sqrt(result);
+}
+
+template<class T>
+T SparseVector<T>::operator[](int index) const {
+    if (index >= this->dim) {
+        throw "Nincs ilyen index!";
+    }
+    for (int i = 0; i < this->nZeroDim; i++) {
+        if (this->vektor[i].index == index) {
+            return this->vektor[i].elem;
         }
-        return os;
     }
+    return 0;
+}
 
-    friend std::istream& operator>>(std::istream& is, SparseVector<T>& v) {
-        for (int i = 0; i < v.size; i++) {
-            is >> v.data[i].index >> v.data[i].value;
-        }
-        return is;
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const Vector<T>& v) {
-        for (int i = 0; i < v.size; i++) {
-            os << v.data[i] << " ";
-        }
-        os << std::endl;
-        return os;
-    }
-
-    friend std::istream& operator>>(std::istream& is, Vector<T>& v) {
-        for (int i = 0; i < v.size; i++) {
-            is >> v.data[i];
-        }
-        return is;
-    }
-};
+template<class T>
+void SparseVector<T>::print() {
+    std::cout << *this;
+}

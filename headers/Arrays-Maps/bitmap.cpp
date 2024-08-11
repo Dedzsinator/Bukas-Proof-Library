@@ -1,212 +1,204 @@
 #include <iostream>
 #include <stdexcept>
-#include <cstring>
+#include <cstdint>
+#include <cstring> // for memset, memcpy
 
-// Bitset class implementation
-template<class T>
-class Bitset {
+template <typename T = uint64_t>
+class BitSet {
 private:
-    size_t size;
-    T* data;
+    T* bits;
+    size_t numBits;
+    size_t numWords;
+
+    static constexpr size_t bitsPerWord = sizeof(T) * 8;
 
 public:
-    Bitset() : size(0), data(nullptr) {}
-
-    Bitset(size_t size) : size(size) {
-        data = new T[size]();
+    explicit BitSet(size_t size) : numBits(size) {
+        numWords = (size + bitsPerWord - 1) / bitsPerWord;
+        bits = new T[numWords];
+        std::memset(bits, 0, numWords * sizeof(T));  // Initialize to 0
     }
 
-    Bitset(size_t size, const T& val) : size(size) {
-        data = new T[size];
-        for (size_t i = 0; i < size; ++i) {
-            data[i] = val;
-        }
+    ~BitSet() {
+        delete[] bits;
     }
 
-    Bitset(const Bitset<T>& other) : size(other.size) {
-        data = new T[size];
-        std::memcpy(data, other.data, size * sizeof(T));
+    BitSet(const BitSet& other) : numBits(other.numBits), numWords(other.numWords) {
+        bits = new T[numWords];
+        std::memcpy(bits, other.bits, numWords * sizeof(T));
     }
 
-    Bitset<T>& operator=(const Bitset<T>& other) {
+    BitSet& operator=(const BitSet& other) {
         if (this != &other) {
-            delete[] data;
-            size = other.size;
-            data = new T[size];
-            std::memcpy(data, other.data, size * sizeof(T));
+            delete[] bits;
+            numBits = other.numBits;
+            numWords = other.numWords;
+            bits = new T[numWords];
+            std::memcpy(bits, other.bits, numWords * sizeof(T));
         }
         return *this;
     }
 
-    void push_back(const T& value) {
-        T* newData = new T[size + 1];
-        std::memcpy(newData, data, size * sizeof(T));
-        newData[size] = value;
-        delete[] data;
-        data = newData;
-        ++size;
+    void set(size_t index) {
+        if (index >= numBits) throw std::out_of_range("BitSet index out of range");
+        bits[index / bitsPerWord] |= (T(1) << (index % bitsPerWord));
     }
 
-    void pop_back() {
-        if (size == 0) {
-            throw std::out_of_range("No elements to pop");
+    void clear(size_t index) {
+        if (index >= numBits) throw std::out_of_range("BitSet index out of range");
+        bits[index / bitsPerWord] &= ~(T(1) << (index % bitsPerWord));
+    }
+
+    void toggle(size_t index) {
+        if (index >= numBits) throw std::out_of_range("BitSet index out of range");
+        bits[index / bitsPerWord] ^= (T(1) << (index % bitsPerWord));
+    }
+
+    bool test(size_t index) const {
+        if (index >= numBits) throw std::out_of_range("BitSet index out of range");
+        return (bits[index / bitsPerWord] & (T(1) << (index % bitsPerWord))) != 0;
+    }
+
+    void reset() {
+        std::memset(bits, 0, numWords * sizeof(T));
+    }
+
+    size_t size() const {
+        return numBits;
+    }
+
+    // Bitwise operators
+    BitSet& operator|=(const BitSet& other) {
+        if (numBits != other.numBits) throw std::invalid_argument("BitSet sizes do not match");
+        for (size_t i = 0; i < numWords; ++i) {
+            bits[i] |= other.bits[i];
         }
-        T* newData = new T[size - 1];
-        std::memcpy(newData, data, (size - 1) * sizeof(T));
-        delete[] data;
-        data = newData;
-        --size;
+        return *this;
     }
 
-    void set(size_t index, const T& value) {
-        if (index >= size) {
-            throw std::out_of_range("Index out of range");
+    BitSet& operator&=(const BitSet& other) {
+        if (numBits != other.numBits) throw std::invalid_argument("BitSet sizes do not match");
+        for (size_t i = 0; i < numWords; ++i) {
+            bits[i] &= other.bits[i];
         }
-        data[index] = value;
+        return *this;
     }
 
-    T get(size_t index) {
-        if (index >= size) {
-            throw std::out_of_range("Index out of range");
+    BitSet& operator^=(const BitSet& other) {
+        if (numBits != other.numBits) throw std::invalid_argument("BitSet sizes do not match");
+        for (size_t i = 0; i < numWords; ++i) {
+            bits[i] ^= other.bits[i];
         }
-        return data[index];
+        return *this;
     }
 
-    size_t get_size() {
-        return size;
+    BitSet operator~() const {
+        BitSet result(*this);
+        for (size_t i = 0; i < numWords; ++i) {
+            result.bits[i] = ~bits[i];
+        }
+        return result;
     }
 
-    ~Bitset() {
-        delete[] data;
+    friend BitSet operator|(BitSet lhs, const BitSet& rhs) {
+        lhs |= rhs;
+        return lhs;
+    }
+
+    friend BitSet operator&(BitSet lhs, const BitSet& rhs) {
+        lhs &= rhs;
+        return lhs;
+    }
+
+    friend BitSet operator^(BitSet lhs, const BitSet& rhs) {
+        lhs ^= rhs;
+        return lhs;
     }
 };
 
-// Bitmap class implementation
-template<class T>
+template <typename T = uint64_t>
 class Bitmap {
 private:
     size_t width;
     size_t height;
-    Bitset<T>* data;
+    BitSet<T> bits;
+
+    size_t getIndex(size_t x, size_t y) const {
+        if (x >= width || y >= height) throw std::out_of_range("Bitmap index out of range");
+        return y * width + x;
+    }
 
 public:
-    Bitmap() : width(0), height(0), data(nullptr) {}
+    Bitmap(size_t width, size_t height) : width(width), height(height), bits(width * height) {}
 
-    Bitmap(size_t width, size_t height) : width(width), height(height) {
-        data = new Bitset<T>[height];
-        for (size_t i = 0; i < height; ++i) {
-            data[i] = Bitset<T>(width);
-        }
+    void set(size_t x, size_t y) {
+        bits.set(getIndex(x, y));
     }
 
-    Bitmap(size_t width, size_t height, const T& val) : width(width), height(height) {
-        data = new Bitset<T>[height];
-        for (size_t i = 0; i < height; ++i) {
-            data[i] = Bitset<T>(width, val);
-        }
+    void clear(size_t x, size_t y) {
+        bits.clear(getIndex(x, y));
     }
 
-    Bitmap(const Bitmap<T>& other) : width(other.width), height(other.height) {
-        data = new Bitset<T>[height];
-        for (size_t i = 0; i < height; ++i) {
-            data[i] = other.data[i];
-        }
+    void toggle(size_t x, size_t y) {
+        bits.toggle(getIndex(x, y));
     }
 
-    Bitmap<T>& operator=(const Bitmap<T>& other) {
-        if (this != &other) {
-            delete[] data;
-            width = other.width;
-            height = other.height;
-            data = new Bitset<T>[height];
-            for (size_t i = 0; i < height; ++i) {
-                data[i] = other.data[i];
-            }
-        }
-        return *this;
+    bool test(size_t x, size_t y) const {
+        return bits.test(getIndex(x, y));
     }
 
-    void set(size_t x, size_t y, const T& value) {
-        if (x >= width || y >= height) {
-            throw std::out_of_range("Index out of range");
-        }
-        data[y].set(x, value);
+    void reset() {
+        bits.reset();
     }
 
-    T get(size_t x, size_t y) {
-        if (x >= width || y >= height) {
-            throw std::out_of_range("Index out of range");
-        }
-        return data[y].get(x);
-    }
-
-    size_t get_width() {
+    size_t getWidth() const {
         return width;
     }
 
-    size_t get_height() {
+    size_t getHeight() const {
         return height;
     }
 
-    ~Bitmap() {
-        delete[] data;
-    }
-};
-
-// BitArray class implementation
-template<class T>
-class BitArray {
-private:
-    size_t size;
-    Bitset<T>* data;
-
-public:
-    BitArray() : size(0), data(nullptr) {}
-
-    BitArray(size_t size) : size(size) {
-        data = new Bitset<T>(size);
-    }
-
-    BitArray(size_t size, const T& val) : size(size) {
-        data = new Bitset<T>(size, val);
-    }
-
-    BitArray(const BitArray<T>& other) : size(other.size) {
-        data = new Bitset<T>(*other.data);
-    }
-
-    BitArray<T>& operator=(const BitArray<T>& other) {
-        if (this != &other) {
-            delete data;
-            size = other.size;
-            data = new Bitset<T>(*other.data);
-        }
+    // Bitwise operators for Bitmap
+    Bitmap& operator|=(const Bitmap& other) {
+        if (width != other.width || height != other.height)
+            throw std::invalid_argument("Bitmap dimensions do not match");
+        bits |= other.bits;
         return *this;
     }
 
-    void push_back(const T& value) {
-        data->push_back(value);
-        ++size;
+    Bitmap& operator&=(const Bitmap& other) {
+        if (width != other.width || height != other.height)
+            throw std::invalid_argument("Bitmap dimensions do not match");
+        bits &= other.bits;
+        return *this;
     }
 
-    void pop_back() {
-        data->pop_back();
-        --size;
+    Bitmap& operator^=(const Bitmap& other) {
+        if (width != other.width || height != other.height)
+            throw std::invalid_argument("Bitmap dimensions do not match");
+        bits ^= other.bits;
+        return *this;
     }
 
-    void set(size_t index, const T& value) {
-        data->set(index, value);
+    Bitmap operator~() const {
+        Bitmap result(*this);
+        result.bits = ~bits;
+        return result;
     }
 
-    T get(size_t index) {
-        return data->get(index);
+    friend Bitmap operator|(Bitmap lhs, const Bitmap& rhs) {
+        lhs |= rhs;
+        return lhs;
     }
 
-    size_t get_size() {
-        return size;
+    friend Bitmap operator&(Bitmap lhs, const Bitmap& rhs) {
+        lhs &= rhs;
+        return lhs;
     }
 
-    ~BitArray() {
-        delete data;
+    friend Bitmap operator^(Bitmap lhs, const Bitmap& rhs) {
+        lhs ^= rhs;
+        return lhs;
     }
 };

@@ -9,6 +9,8 @@ template <typename T>
 class Matrix {
 private:
     T** data;
+
+protected:
     int rows;
     int cols;
 
@@ -53,19 +55,19 @@ private:
             }
 
             // Calculating the 7 products, recursively (p1, p2...p7)
-            Matrix<T> P1 = strassenMultiply(add(A11, A22), add(B11, B22));
-            Matrix<T> P2 = strassenMultiply(add(A21, A22), B11);
-            Matrix<T> P3 = strassenMultiply(A11, subtract(B12, B22));
-            Matrix<T> P4 = strassenMultiply(A22, subtract(B21, B11));
-            Matrix<T> P5 = strassenMultiply(add(A11, A12), B22);
-            Matrix<T> P6 = strassenMultiply(subtract(A21, A11), add(B11, B12));
-            Matrix<T> P7 = strassenMultiply(subtract(A12, A22), add(B21, B22));
+            Matrix<T> P1 = strassenMultiply(A11 + A22, B11 + B22);
+            Matrix<T> P2 = strassenMultiply(A21 + A22, B11);
+            Matrix<T> P3 = strassenMultiply(A11, B12 - B22);
+            Matrix<T> P4 = strassenMultiply(A22, B21 - B11);
+            Matrix<T> P5 = strassenMultiply(A11 + A12, B22);
+            Matrix<T> P6 = strassenMultiply(A21 - A11, B11 + B12);
+            Matrix<T> P7 = strassenMultiply(A12 - A22, B21 + B22);
 
             // Calculating C11, C12, C21, C22
-            Matrix<T> C11 = add(subtract(add(P1, P4), P5), P7);
-            Matrix<T> C12 = add(P3, P5);
-            Matrix<T> C21 = add(P2, P4);
-            Matrix<T> C22 = add(subtract(add(P1, P3), P2), P6);
+            Matrix<T> C11 = P1 + P4 - P5 + P7;
+            Matrix<T> C12 = P3 + P5;
+            Matrix<T> C21 = P2 + P4;
+            Matrix<T> C22 = P1 + P3 - P2 + P6;
 
             // Combining the 4 results into a single matrix
             for (int i = 0; i < newSize; ++i) {
@@ -105,11 +107,11 @@ public:
         return data[row][col];
     }
 
-    int getRows() {
+    int getRows() const{
         return rows;
     }
 
-    int getCols() {
+    int getCols() const{
         return cols;
     }
 
@@ -166,7 +168,7 @@ public:
         std::swap(cols, other.cols);
     }
 
-    bool operator==(const Matrix<T>& other) {
+    bool operator==(const Matrix<T>& other) const {
         if (rows != other.rows || cols != other.cols) {
             return false;
         }
@@ -180,7 +182,7 @@ public:
         return true;
     }
 
-    bool operator!=(const Matrix<T>& other) {
+    bool operator!=(const Matrix<T>& other) const{
         return !(*this == other);
     }
 
@@ -205,11 +207,11 @@ public:
         return is;
     }
 
-    Matrix<T> operator*(const Matrix<T>& other) {
+    Matrix<T> operator*(const Matrix<T>& other) const {
         return strassenMultiply(*this, other);
     }
 
-    Matrix<T> operator+(const Matrix<T>& other) {
+    Matrix<T> operator+(const Matrix<T>& other) const {
         if (rows != other.rows || cols != other.cols) {
             throw std::invalid_argument("Invalid dimensions");
         }
@@ -221,11 +223,26 @@ public:
         }
         return result;
     }
+
+    Matrix<T> operator-(const Matrix<T>& other) const{
+        if (rows != other.rows || cols != other.cols) {
+            throw std::invalid_argument("Invalid dimensions");
+        }
+        Matrix<T> result(rows, cols);
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                result.data[i][j] = data[i][j] - other.data[i][j];
+            }
+        }
+        return result;
+    }
 };
 
 template <typename T>
 class sparseMatrix : public Matrix<T> {
   private :
+    int rows;
+    int cols;
     int* row;
     int* col;
     T* val;
@@ -380,15 +397,27 @@ class sparseMatrix : public Matrix<T> {
     void operator =(sparseMatrix<T>& other) {
         this->copy(other);
     }
-    bool operator==(const sparseMatrix<T>& other) {
-        if (this->getRows() != other.getRows() || this->getCols() != other.getCols()) {
+    
+    bool operator==(const sparseMatrix<T>& other) const {
+        if (this->rows != other.rows || this->cols != other.cols) {
             return false;
         }
-        for (int i = 0; i < this->getRows(); i++) {
-            for (int j = 0; j < this->getCols(); j++) {
-                if (this->get(i, j) != other.get(i, j)) {
-                    return false;
-                }
+        for (int i = 0; i < rows * cols; i++) {
+            if (this->row[i] != other.row[i] ||
+                this->col[i] != other.col[i] ||
+                this->val[i] != other.val[i] ||
+                this->nextInd[i] != other.nextInd[i]) {
+                return false;
+            }
+        }
+        for (int i = 0; i < rows + 1; i++) {
+            if (this->rowPtr[i] != other.rowPtr[i]) {
+                return false;
+            }
+        }
+        for (int i = 0; i < cols + 1; i++) {
+            if (this->colPtr[i] != other.colPtr[i]) {
+                return false;
             }
         }
         return true;

@@ -4,7 +4,7 @@ CFLAGS = -Wall -O3 -g -std=c++11
 
 # Source files
 SORT_SRCS = sorttest.cpp ../headers/Misc-Algorithms/Sorting/sorts.cpp
-MAPS_SRCS = tests/mapstest.cpp
+MAPS_SRCS = mapstest.cpp
 
 # Object files
 SORT_OBJS = $(SORT_SRCS:.cpp=.o)
