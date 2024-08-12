@@ -187,6 +187,7 @@ void blockSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
 void smoothSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
   cout<<"W.I.P"<<endl;
 }
+/*
 
 void spaghettiSort(Iterator begin, Iterator end, Compare comp = COMPARE()) {
     using ValueType = typename std::iterator_traits<Iterator>::value_type;
@@ -265,6 +266,7 @@ void sqrtSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
 void shelfSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
   cout<<"W.I.P"<<endl;
 }
+*/
 //!----------------------------------------------
 
 void bucketSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
@@ -275,9 +277,7 @@ void bucketSort(ITERATOR begin, ITERATOR end, COMPARE comp = COMPARE()) {
   if (size <= 1) return;
 
   int num_buckets = static_cast<int>(std::sqrt(size));
-  auto min_val = *std::min_element(begin, end, comp);
-  auto max_val = *std::max_element(begin, end, comp);
-
+  auto [min_val, max_val] = std::minmax_element(begin, end);
   
   if (min_val == max_val) return;
 

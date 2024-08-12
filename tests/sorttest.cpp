@@ -7,9 +7,10 @@
 #include <string>
 #include <map>
 #include <iomanip>
+#include <fstream>
 #include "../headers/Misc-Algorithms/Sorting/sorts.cpp"
 using namespace std;
-#define BIG_SIZE 10000
+#define BIG_SIZE 50000
 #define SMALL_SIZE BIG_SIZE / 100
 
 class Timer {
@@ -84,8 +85,7 @@ int main() {
             auto inputCopy = input;
             Timer t;
             if(names[i] == "copy") {
-                //!memcopy
-                memcpy(inputCopy.begin(), inputCopy.end(), inputCopy.begin());
+                std::copy(inputCopy.begin(), inputCopy.end(), inputCopy.begin());
                 durations[i] = t.getDuration(); 
                 executedFlags[i] = true; 
             } else if (names[i] == "bubble") {
@@ -125,37 +125,39 @@ int main() {
                 //sorts.magyarSort(inputCopy.begin(), inputCopy.end());
                 //executedFlags[i] = true;
             } else if(names[i] == "ska") {
-                sorts.skaSort(inputCopy.begin(), inputCopy.end());
-                executedFlags[i] = true; 
+                //sorts.skaSort(inputCopy.begin(), inputCopy.end());
+                //executedFlags[i] = true; 
             } else if(names[i] == "skacopy") {
-                sorts.skaCopySort(inputCopy.begin(), inputCopy.end());
-                executedFlags[i] = true;
+                //sorts.skaCopySort(inputCopy.begin(), inputCopy.end());
+                //executedFlags[i] = true;
             } else if(names[i] == "std") {
                 sort(inputCopy.begin(), inputCopy.end());
                 executedFlags[i] = true;
             } else if(names[i] == "grail") {
-                grailSort(inputCopy.begin(), inputCopy.end());
-                executedFlags[i] = true;
+                //grailSort(inputCopy.begin(), inputCopy.end());
+                //executedFlags[i] = true;
             } else if(names[i] == "sqrt") {
-                sqrtSort(n, inputCopy.begin(), inputCopy.end());
-                executedFlags[i] = true;
+                //sqrtSort(n, inputCopy.begin(), inputCopy.end());
+                //executedFlags[i] = true;
             } else if(names[i] == "flag") {
-                americanFlagSort(inputCopy.begin(), inputCopy.end());
-                executedFlags[i] = true;
+                //americanFlagSort(inputCopy.begin(), inputCopy.end());
+                //executedFlags[i] = true;
             } else if(names[i] == "spagetti") {
-                spagettiSort(inputCopy.begin(), inputCopy.end());
+                //spagettiSort(inputCopy.begin(), inputCopy.end());
                 executedFlags[i] = true;
             } else if(names[i] == "shelf") {
-                shelfSort(inputCopy.begin(), inputCopy.end());
-                executedFlags[i] = true;
+                //shelfSort(inputCopy.begin(), inputCopy.end());
+                //executedFlags[i] = true;
             } else if(names[i] == "stable") {
-                std::stable_sort(inputCopy.begin(), inputCopy.end());
+                stable_sort(inputCopy.begin(), inputCopy.end());
                 executedFlags[i] = true;
             }
             durations[i] = t.getDuration();
         }
         results[type] = durations;
     }
+
+    ofstream file("res.csv");
 
     for (const auto& type : types) {
         const auto& durations = results[type];
@@ -170,16 +172,16 @@ int main() {
     }
 
     for (const auto& type : types) {
-        std::cout << right << setw(10) << type << "   ";
+        file << right << setw(10) << type << "   ";
         for (size_t i = 0; i < names.size(); ++i) {
             if (executedFlags[i]) {
-                std::cout << fixed << setprecision(3) << results[type][i] << "s    "; 
+                file << fixed << setprecision(3) << results[type][i] << "s    "; 
             }
         }
-        std::cout << endl; 
+        file << endl; 
     }
 
-    std::cout<<endl;
+    file<<endl;
     
 
     size_t maxNameLength = 0;
@@ -191,24 +193,24 @@ int main() {
 
     maxNameLength += 3;
 
-    std::cout << right << setw(10) << "worst" << "   ";
+    file << right << setw(10) << "worst" << "   ";
 
     for (size_t i = 0; i < names.size(); ++i) {
         if (executedFlags[i]) {
             
-            std::cout << fixed << setprecision(3) << maxDurations[names[i]] << "s    "; 
+            file << fixed << setprecision(3) << maxDurations[names[i]] << "s    "; 
         }
     }
-    std::cout<<endl<<"\t  ";
+    file<<endl<<"\t  ";
 
-
+    // Write the names aligned based on the maximum name length
     for (size_t i = 0; i < names.size(); ++i) {
         if (executedFlags[i]) {
-            std::cout << right << setw(maxNameLength) << names[i] << " ";
+            file << right << setw(maxNameLength) << names[i] << " ";
         }
     }
 
-    std::cout << endl;
+    file.close();
 
     return 0;
 }

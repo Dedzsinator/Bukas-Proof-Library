@@ -59,6 +59,10 @@ public:
     }
 
     bool remove(T value) {
+        if (isEmpty()) {
+            throw std::out_of_range("Set is empty");
+        }
+
         Node* current = head;
         Node* previous = nullptr;
         while (current != nullptr) {
