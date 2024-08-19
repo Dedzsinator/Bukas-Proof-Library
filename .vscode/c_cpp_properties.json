@@ -1,17 +1,34 @@
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "Windows",
+            "intelliSenseMode": "windows-gcc-x64", // Use windows-gcc-x64 or windows-gcc-x86 based on your requirements
+            "compilerPath": "C:/mingw64/bin/g++.exe", // Path to your GCC compiler
+            "cStandard": "c17",
+            "cppStandard": "c++17",
             "includePath": [
                 "${workspaceFolder}/**"
             ],
             "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE"
+                "_WINDOWS"
             ],
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerArgs": [
+                "-m64"
+            ]
+        },
+        {
+            "name": "Linux",
+            "intelliSenseMode": "linux-gcc-x64", // Assuming you're using a 64-bit GCC on Linux
+            "compilerPath": "/usr/bin/g++",
             "cStandard": "c17",
-            "intelliSenseMode": "windows-gcc-x64"
+            "cppStandard": "c++17",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_LINUX"
+            ]
         }
     ],
     "version": 4
