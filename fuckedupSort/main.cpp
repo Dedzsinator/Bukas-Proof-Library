@@ -103,7 +103,7 @@ inline void printVector(const vector<int>& vec) {
 
 int main() {
     // Generate a number of random numbers
-    const size_t N = 10000000; // Adjust N for testing
+    const size_t N = 100000000; // Adjust N for testing
     vector<int> data(N);
     generate(data.begin(), data.end(), []() { return rand(); });
 
