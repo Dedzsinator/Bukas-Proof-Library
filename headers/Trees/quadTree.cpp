@@ -1,16 +1,19 @@
-#include <iostream>
-#include <vector>
 #include <memory>
-#include <cassert>
-#include <cstdlib>
+#include <vector>
+#include <iostream>
 
+// Assuming Point is defined as follows:
 template <typename T, typename Alloc = std::allocator<T>>
 struct Point {
     T x, y;
     Point(T _x, T _y) : x(_x), y(_y) {}
 };
 
-template <typename T, typename Alloc = CustomAllocator<T>>
+// CustomAllocator is assumed to be defined elsewhere
+template <typename T>
+using CustomAllocator = std::allocator<T>;
+
+template <typename T, typename Alloc = std::allocator<T>>
 struct AABB {
     Point<T, Alloc> center;
     T halfWidth, halfHeight;
@@ -82,24 +85,5 @@ public:
         if (southwest->insert(point)) return true;
 
         return false;
-    }
-
-    void query(const AABB<T, Alloc>& range, std::vector<Point<T, Alloc>, Alloc>& found) const {
-        if (!boundary.intersects(range)) {
-            return;
-        }
-
-        for (const Point<T, Alloc>& p : points) {
-            if (range.contains(p)) {
-                found.push_back(p);
-            }
-        }
-
-        if (divided) {
-            northeast->query(range, found);
-            northwest->query(range, found);
-            southeast->query(range, found);
-            southwest->query(range, found);
-        }
     }
 };

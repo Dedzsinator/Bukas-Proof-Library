@@ -1,5 +1,6 @@
 #include "../headers/Trees/quadTree.cpp"
 #include <cassert>
+#include <iostream>
 
 void test_insert() {
     AABB<float> boundary(Point<float>(0, 0), 200, 200);
