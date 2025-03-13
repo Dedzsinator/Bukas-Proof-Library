@@ -1,4 +1,5 @@
 #include <iostream>
+#include "prettynumber.cpp"
 #include <vector>
 #include <algorithm>
 #include <cassert>
@@ -50,9 +51,9 @@ void countingSort(AlignedVector<uint32_t>& array, int exp) {
     }
 
     // Place elements in sorted order
-    for (int i = size - 1; i >= 0; --i) {
-        output[count[(array[i] >> exp) & 0xFF] - 1] = array[i];
-        --count[(array[i] >> exp) & 0xFF];
+    for (size_t i = size; i > 0; --i) {
+        output[count[(array[i - 1] >> exp) & 0xFF] - 1] = array[i - 1];
+        --count[(array[i - 1] >> exp) & 0xFF];
     }
 
     // Copy the output array back to the original array
@@ -73,11 +74,12 @@ void radixSort(AlignedVector<uint32_t>& array) {
 
 // Main function to test the sorting
 int main() {
-    constexpr size_t ARRAY_SIZE = 100000000; // 100 million elements
-    AlignedVector<uint32_t> data(ARRAY_SIZE);
+    constexpr size_t N = 1000000; // 100 million elements
+    int modulo = 100000;
+    AlignedVector<uint32_t> data(N);
 
     // Initialize array with random values
-    std::generate(data.begin(), data.end(), []() { return rand(); });
+    std::generate(data.begin(), data.end(), [modulo]() { return rand() % modulo; });
 
     // Sort the array
     chrono::steady_clock::time_point begin = chrono::steady_clock::now();
@@ -85,14 +87,10 @@ int main() {
     chrono::steady_clock::time_point end = chrono::steady_clock::now();
 
     // Calculate the time taken
-    chrono::duration<double> timeTaken = chrono::duration_cast<chrono::duration<double>>(end - begin);
-    std::cout << "Time taken: " << timeTaken.count() << " seconds" << std::endl;
+    chrono::duration<double> diff = chrono::duration_cast<chrono::duration<double>>(end - begin);
 
-    // Verify the result
-    for (size_t i = 1; i < data.size(); ++i) {
-        assert(data[i - 1] <= data[i]);
-    }
-
-    std::cout << "Array sorted successfully!" << std::endl;
+    cout << "N = " << prettyNumber(N) << " - Modulo = " << (modulo == -1 ? "no cap " : prettyNumber(modulo)) << endl;
+    cout << "Time taken: " << diff.count() << " s\n";
+    cout << "Is sorted: " << (is_sorted(data.begin(), data.end()) ? "\033[1;32m[Yes]\033[0m" : "\033[1;31m[No]\033[0m") << endl;
     return 0;
 }

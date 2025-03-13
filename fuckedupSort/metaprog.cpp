@@ -1,3 +1,4 @@
+#include "prettynumber.cpp"
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -94,7 +95,8 @@ void printVector(const vector<int>& vec) noexcept {
 }
 
 int main() {
-    const int N = 10000000; // Adjust N for testing
+    const int N = 1000000; // Adjust N for testing
+    int modulo = -1;
     vector<int> data(N);
     generate(data.begin(), data.end(), []() { return rand(); });
 
@@ -115,7 +117,8 @@ int main() {
         cout << "Sorted data:\n";
         printVector(data);
     }
-
+    
+    cout << "N = " << prettyNumber(N) << " - Modulo = " << (modulo == -1 ? "no cap " : prettyNumber(modulo)) << endl;
     cout << "Time taken: " << diff.count() << " s\n";
     cout << "Is sorted: " << (is_sorted(data.begin(), data.end()) ? "\033[1;32m[Yes]\033[0m" : "\033[1;31m[No]\033[0m") << endl;
 

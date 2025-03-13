@@ -1,57 +1,52 @@
+#include "prettynumber.cpp"
 #include <iostream>
 #include <vector>
-#include <queue>
 #include <algorithm>
 #include <cmath>
 #include <chrono>
 #include <thread>
 #include <future>
 #include <mutex>
-#include <atomic>
-#include <numeric>  // For iota
-#include <random>   // For rand
+#include <random>
+#include <limits>
 
 using namespace std;
 
-// Function to perform heap sort on a deque (deque used instead of vector for better locality)
-void heapSort(deque<int>& deq) {
-    priority_queue<int, vector<int>, greater<int>> minHeap(deq.begin(), deq.end());
-    for (size_t index = 0; !minHeap.empty(); ++index) {
-        deq[index] = minHeap.top();
-        minHeap.pop();
-    }
+// Function to perform sorting on a vector
+void sortVector(vector<int>& vec) {
+    std::sort(vec.begin(), vec.end());
 }
 
 // Function to distribute elements into buckets
-void distributeIntoBuckets(const vector<int>& arr, vector<deque<int>>& buckets, vector<mutex>& bucketMutex, int numBuckets, int minVal, int range, int start, int end) {
-    vector<deque<int>> localBuckets(numBuckets);
-
+void distributeIntoBuckets(const vector<int>& arr, vector<vector<int>>& buckets, vector<mutex>& bucketMutex, int numBuckets, int minVal, double range, int start, int end) {
     for (int i = start; i < end; ++i) {
         int value = arr[i];
-        int bucketIndex = (value - minVal) * numBuckets / range;
+        int bucketIndex = static_cast<int>((value - minVal) * numBuckets / range);
         bucketIndex = min(max(bucketIndex, 0), numBuckets - 1);
-        localBuckets[bucketIndex].push_back(value);
-    }
 
-    // Write local buckets to global buckets with fine-grained locking
-    for (int i = 0; i < numBuckets; ++i) {
-        unique_lock<mutex> lock(bucketMutex[i]);
-        buckets[i].insert(buckets[i].end(), make_move_iterator(localBuckets[i].begin()), make_move_iterator(localBuckets[i].end()));
+        {
+            lock_guard<mutex> lock(bucketMutex[bucketIndex]);
+            buckets[bucketIndex].push_back(value);
+        }
     }
 }
 
-// Parallel bucket sort function with heaps in each bucket
-void bucketHeapSort(vector<int>& arr, int numBuckets = 0) {
+// Parallel bucket sort function with sorting in each bucket
+void bucketSort(vector<int>& arr, int numBuckets = 0) {
     if (arr.empty()) return;
 
     numBuckets = (numBuckets == 0) ? sqrt(arr.size()) : numBuckets;
-    vector<deque<int>> buckets(numBuckets);
-    vector<mutex> bucketMutex(numBuckets); // Initialize mutexes
+    vector<vector<int>> buckets(numBuckets);
+    vector<mutex> bucketMutex(numBuckets);
 
     auto [minIt, maxIt] = minmax_element(arr.begin(), arr.end());
     int minVal = *minIt;
     int maxVal = *maxIt;
-    int range = maxVal - minVal + 1;
+    double range = static_cast<double>(maxVal - minVal) + 1.0;
+
+    if (range == 1) {
+        return;
+    }
 
     unsigned int numThreads = thread::hardware_concurrency();
     vector<future<void>> futures;
@@ -67,15 +62,16 @@ void bucketHeapSort(vector<int>& arr, int numBuckets = 0) {
         fut.get();
     }
 
-    // Parallelize the sorting of buckets
+    // Sort each bucket in parallel
     vector<future<void>> sortFutures;
     for (auto& bucket : buckets) {
-        sortFutures.push_back(async(launch::async, heapSort, ref(bucket)));
+        sortFutures.push_back(async(launch::async, sortVector, ref(bucket)));
     }
     for (auto& fut : sortFutures) {
         fut.get();
     }
 
+    // Sequentially merge the sorted buckets
     size_t index = 0;
     for (auto& bucket : buckets) {
         for (int value : bucket) {
@@ -91,12 +87,14 @@ void printVector(const vector<int>& vec) {
     cout << endl;
 }
 
-
 int main() {
-    // Generate a number of random numbers
-    int N = 10000000; // Adjust N for testing
+    // Generate a number of random numbers with uniform distribution
+    int N = 1000000; // Adjust N for testing
+    int modulo = 1000000;
     vector<int> data(N);
-    generate(data.begin(), data.end(), []() { return rand(); });
+
+    // Using a narrower range of random numbers for better distribution
+    generate(data.begin(), data.end(), [&]() { return rand() % modulo; });
 
     if (N <= 30) {
         // Print original data
@@ -106,7 +104,7 @@ int main() {
 
     // Record the time
     auto start = chrono::high_resolution_clock::now();
-    bucketHeapSort(data);
+    bucketSort(data);
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double> diff = end - start;
 
@@ -115,7 +113,8 @@ int main() {
         cout << "Sorted data:\n";
         printVector(data);
     }
-
+    
+    cout << "N = " << prettyNumber(N) << " - Modulo = " << (modulo == -1 ? "no cap " : prettyNumber(modulo)) << endl;
     cout << "Time taken: " << diff.count() << " s\n";
     cout << "Is sorted: " << (is_sorted(data.begin(), data.end()) ? "\033[1;32m[Yes]\033[0m" : "\033[1;31m[No]\033[0m") << endl;
 

@@ -1,5 +1,5 @@
-#include <iostream>
 #include "prettynumber.cpp"
+#include <iostream>
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -11,13 +11,12 @@
 using namespace std;
 
 // Compile-time calculation for number of buckets
-template<size_t Size>
-constexpr int calculateNumBuckets() noexcept {
+constexpr int calculateNumBuckets(size_t Size) noexcept {
     return Size < 16 ? 1 : static_cast<int>(sqrt(Size));
 }
 
-// Aggressively unrolled insertion sort with SIMD
-inline void simdInsertionSort(vector<int>& arr) noexcept {
+// Optimized insertion sort with no inline assembly (reliable performance)
+void asmInsertionSort(vector<int>& arr) noexcept {
     size_t n = arr.size();
     if (n <= 1) return;
 
@@ -25,45 +24,52 @@ inline void simdInsertionSort(vector<int>& arr) noexcept {
         int key = arr[i];
         size_t j = i;
 
-        // SIMD comparison (vectorized)
-        while (j >= 4) {
-            __m128i keys = _mm_set1_epi32(key);
-            __m128i vals = _mm_loadu_si128(reinterpret_cast<__m128i*>(&arr[j - 4]));
-            __m128i cmp = _mm_cmpgt_epi32(vals, keys);
-            int mask = _mm_movemask_epi8(cmp);
-
-            if (mask == 0) break;
-
-            arr[j] = arr[j - 1];
-            --j;
-        }
-
         while (j > 0 && arr[j - 1] > key) {
             arr[j] = arr[j - 1];
             --j;
         }
+
         arr[j] = key;
     }
 }
 
-// Function for distributing elements into buckets (noexcept for optimization)
-inline void distributeIntoBuckets(const vector<int>& arr, vector<vector<int>>& buckets, int numBuckets, int minVal, int range) noexcept {
+// Function to distribute elements into buckets using inline assembly
+void asmDistributeIntoBuckets(const vector<int>& arr, vector<vector<int>>& buckets, int numBuckets, int minVal, int range) noexcept {
     int bucketSize = (range + numBuckets - 1) / numBuckets;
-    for (const auto& value : arr) {
-        int bucketIndex = (value - minVal) / bucketSize;
+
+    // Avoid division by zero or other invalid operations
+    if (bucketSize <= 0) bucketSize = 1;
+
+    for (size_t i = 0; i < arr.size(); ++i) {
+        int value = arr[i];
+        int bucketIndex;
+
+        // Inline assembly to calculate bucket index
+        __asm__ __volatile__ (
+            "subl %2, %1;"           // value -= minVal
+            "movl %1, %%eax;"        // eax = value
+            "cltd;"                  // Sign extend eax into edx:eax for division
+            "idivl %3;"              // eax = value / bucketSize, edx = remainder
+            "movl %%eax, %0;"        // bucketIndex = eax
+            : "=r" (bucketIndex)     // output
+            : "r" (value), "r" (minVal), "r" (bucketSize) // inputs
+            : "%eax", "%edx", "memory"
+        );
+
         bucketIndex = min(max(bucketIndex, 0), numBuckets - 1);
         buckets[bucketIndex].push_back(value);
     }
 }
 
-// Bucket sort function with SIMD optimization, aggressive inlining, and unrolling
-template<size_t Size, int NumBuckets = calculateNumBuckets<Size>()>
+// Bucket sort function with assembly optimizations
+template<size_t Size>
 void bucketSort(vector<int>& arr) noexcept {
     if (arr.empty()) return;
 
-    // Branch eliminated at compile time
-    if constexpr (Size < 16) {
-        simdInsertionSort(arr);
+    constexpr int NumBuckets = calculateNumBuckets(Size);
+
+    if (Size < 16) {
+        asmInsertionSort(arr);
         return;
     }
 
@@ -74,52 +80,53 @@ void bucketSort(vector<int>& arr) noexcept {
     int maxVal = *maxIt;
     int range = maxVal - minVal + 1;
 
-    distributeIntoBuckets(arr, buckets, NumBuckets, minVal, range);
+    asmDistributeIntoBuckets(arr, buckets, NumBuckets, minVal, range);
 
     size_t index = 0;
     for (auto& bucket : buckets) {
         if (bucket.size() < 16) {
-            simdInsertionSort(bucket);
+            asmInsertionSort(bucket);
         } else {
-            sort(bucket.begin(), bucket.end()); // Use std::sort for larger buckets
+            sort(bucket.begin(), bucket.end());
         }
         copy(bucket.begin(), bucket.end(), arr.begin() + index);
         index += bucket.size();
     }
 }
 
-// Utility function to print the vector (marked noexcept for optimization)
-inline void printVector(const vector<int>& vec) noexcept {
+inline void printVector(const vector<int>& vec) {
     for (int num : vec) {
         cout << num << " ";
     }
     cout << endl;
 }
 
+
 int main() {
-    const int N = 100000000; // Adjust N for testing
+    // Generate a number of random numbers
+    const size_t N = 100000000; // Adjust N for testing
     int modulo = -1;
     vector<int> data(N);
     generate(data.begin(), data.end(), []() { return rand(); });
 
     if (N <= 30) {
+        // Print original data
         cout << "Original data:\n";
         printVector(data);
     }
 
+    // Record the time
     auto start = chrono::high_resolution_clock::now();
-
-    // Use bucketSort with aggressive optimizations
     bucketSort<N>(data);
-
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double> diff = end - start;
 
     if (N <= 30) {
+        // Print sorted data
         cout << "Sorted data:\n";
         printVector(data);
     }
-    
+
     cout << "N = " << prettyNumber(N) << " - Modulo = " << (modulo == -1 ? "no cap " : prettyNumber(modulo)) << endl;
     cout << "Time taken: " << diff.count() << " s\n";
     cout << "Is sorted: " << (is_sorted(data.begin(), data.end()) ? "\033[1;32m[Yes]\033[0m" : "\033[1;31m[No]\033[0m") << endl;

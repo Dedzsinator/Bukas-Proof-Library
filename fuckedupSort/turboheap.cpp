@@ -6,6 +6,7 @@
 #include <chrono>
 #include <random>
 #include <immintrin.h>  // For SSE/AVX intrinsics
+#include "prettynumber.cpp"
 
 using namespace std;
 
@@ -214,11 +215,12 @@ void printVector(const vector<int>& data) {
 }
 
 int main() {
-    const int N = 10000000; // Adjust N for testing
+    const int N = 1000000; // Adjust N for testing
+    int modulo = 10000;
     vector<int> data(N);
 
     // Generating random data
-    std::generate(data.begin(), data.end(), []() { return rand(); });
+    std::generate(data.begin(), data.end(), [modulo]() { return rand() % modulo; });
 
     if (N <= 30) {
         std::cout << "Original data:\n";
@@ -237,9 +239,10 @@ int main() {
         std::cout << "Sorted data:\n";
         printVector(data);
     }
-
-    std::cout << "Time taken: " << diff.count() << " s\n";
-    std::cout << "Is sorted: " << (std::is_sorted(data.data(), data.data() + N) ? "\033[1;32m[Yes]\033[0m" : "\033[1;31m[No]\033[0m") << std::endl;
+  
+    cout << "N = " << prettyNumber(N) << " - Modulo = " << (modulo == -1 ? "no cap " : prettyNumber(modulo)) << endl;
+    cout << "Time taken: " << diff.count() << " s\n";
+    cout << "Is sorted: " << (is_sorted(data.begin(), data.end()) ? "\033[1;32m[Yes]\033[0m" : "\033[1;31m[No]\033[0m") << endl;
 
     return 0;
 }

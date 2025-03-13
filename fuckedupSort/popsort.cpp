@@ -9,6 +9,7 @@
 #include <chrono>
 #include <random>
 #include <numeric>
+#include "prettynumber.cpp"
 using namespace std;
 
 std::mutex mtx;
@@ -124,7 +125,8 @@ inline void printVector(const vector<int>& vec) {
 
 int main() {
     // Generate a number of random numbers
-    const size_t N = 10000000; // Adjust N for testing
+    const size_t N = 100000000; // Adjust N for testing
+    int modulo = -1;
     vector<int> data(N);
     generate(data.begin(), data.end(), []() { return rand(); });
 
@@ -146,6 +148,7 @@ int main() {
         printVector(data);
     }
 
+    cout << "N = " << prettyNumber(N) << " - Modulo = " << (modulo == -1 ? "no cap " : prettyNumber(modulo)) << endl;
     cout << "Time taken: " << diff.count() << " s\n";
     cout << "Is sorted: " << (is_sorted(data.begin(), data.end()) ? "\033[1;32m[Yes]\033[0m" : "\033[1;31m[No]\033[0m") << endl;
 
